@@ -18,11 +18,11 @@ import { Chip } from "@/components/ui/badge";
 import { ButtonLink } from "@/components/ui/button";
 import { CTASection } from "@/components/ui/cta-section";
 import { LevelLadderPinned } from "@/components/ui/level-ladder-pinned";
-import { PosterRail } from "@/components/ui/poster-rail";
+import { ScannerCardStream } from "@/components/ui/scanner-card-stream";
 import { Container, Section, SectionHeader } from "@/components/ui/section";
 import { SpotlightCard } from "@/components/ui/spotlight-card";
 import { FadeIn, Stagger, StaggerItem } from "@/components/ui/text";
-import { Aurora, GridPattern } from "@/components/ui/background";
+import { Aurora, GridPattern, Hairline } from "@/components/ui/background";
 
 const roles = Array.from(new Set(courses.flatMap((c) => c.roles)));
 
@@ -187,9 +187,9 @@ export default function Home() {
       />
 
       {/* Poster gallery */}
-      <PosterRail
-        cards={posters}
-        header={
+      <section className="relative overflow-hidden bg-paper/50 py-20 md:py-28">
+        <Hairline className="absolute inset-x-0 top-0" />
+        <Container>
           <SectionHeader
             eyebrow="From the studio"
             icon={<Sparkles />}
@@ -201,8 +201,11 @@ export default function Home() {
               </ButtonLink>
             }
           />
-        }
-      />
+        </Container>
+        <div className="mt-10">
+          <ScannerCardStream cards={posters} cardWidth={240} cardHeight={320} cardGap={40} />
+        </div>
+      </section>
 
       {/* FAQ */}
       <Section>
