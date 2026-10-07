@@ -168,7 +168,7 @@ export default function DustStory({ className, particleCount = 3000, pinLength =
           <div
             key={m.name}
             ref={(el) => { nodeRefs.current[i] = el; }}
-            className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-1.5 rounded-2xl border border-white/10 bg-ink-2/85 px-5 py-3.5 text-center opacity-0 shadow-[0_14px_30px_-20px_rgba(0,0,0,0.9)] backdrop-blur-md will-change-transform"
+            className="absolute left-1/2 top-1/2 flex flex-col items-center gap-1.5 rounded-2xl border border-white/10 bg-ink-2/85 px-5 py-3.5 text-center opacity-0 shadow-[0_14px_30px_-20px_rgba(0,0,0,0.9)] backdrop-blur-md will-change-transform"
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={m.logo} alt="" className="h-9 w-9" />
@@ -178,7 +178,7 @@ export default function DustStory({ className, particleCount = 3000, pinLength =
         ))}
 
         {/* Hub */}
-        <div ref={hubRef} className="absolute left-1/2 top-1/2 flex h-[168px] w-[168px] -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center gap-2 rounded-3xl border border-accent/40 bg-ink-2 text-center opacity-0 shadow-card-lg will-change-transform">
+        <div ref={hubRef} className="absolute left-1/2 top-1/2 flex h-[168px] w-[168px] flex-col items-center justify-center gap-2 rounded-3xl border border-accent/40 bg-ink-2 text-center opacity-0 shadow-card-lg will-change-transform">
           <span ref={pulseRef} aria-hidden className="pointer-events-none absolute inset-0 rounded-3xl border border-accent opacity-0" />
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/img/logo-white.png" alt="FutureX" className="h-[26px] w-auto" />
