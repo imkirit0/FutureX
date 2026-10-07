@@ -5,7 +5,7 @@ import { useMotionValueEvent, useScroll } from "framer-motion";
 import { useReducedMotion } from "@/lib/use-reduced-motion";
 import { cn } from "@/lib/utils";
 
-/* Pinned scroll story: dust sphere → bursts into 6 model clusters → re-gathers around the Master API hub.
+/* Pinned scroll story: dust sphere → condenses into the FutureX atom (Master API hub) → 6 model nodes branch out of it.
    Scroll progress drives everything; the canvas and node positions are written imperatively (no re-renders). */
 
 export const MODELS = [
@@ -22,7 +22,7 @@ const FEATURES = ["One key for every provider", "Swap models by changing one lin
 const clamp01 = (q: number) => Math.max(0, Math.min(1, q));
 const smooth = (q: number) => { q = clamp01(q); return q * q * (3 - 2 * q); };
 
-type Pt = { x: number; y: number; z: number; ph: number; c: number; cx: number; cy: number; cz: number; hx: number; hy: number; hz: number; jit: number };
+type Pt = { x: number; y: number; z: number; ph: number; c: number; cx: number; cy: number; cz: number; hx: number; hy: number; hz: number; jit: number; out: boolean };
 
 function makePoints(count: number): Pt[] {
   const pts: Pt[] = [];
@@ -34,18 +34,14 @@ function makePoints(count: number): Pt[] {
     const hy = Math.random() * 2 - 1, hr = Math.sqrt(1 - hy * hy), hth = Math.random() * Math.PI * 2;
     pts.push({ x: Math.cos(th) * r * d, y: y * d, z: Math.sin(th) * r * d, ph: Math.random() * Math.PI * 2,
       c: i % 6, cx: Math.cos(ca) * cr, cy: Math.sin(ca) * cr, cz: (Math.random() - 0.5) * 0.6,
-      hx: Math.cos(hth) * hr, hy, hz: Math.sin(hth) * hr, jit: 0.85 + Math.random() * 0.3 });
+      hx: Math.cos(hth) * hr, hy, hz: Math.sin(hth) * hr, jit: 0.85 + Math.random() * 0.3, out: Math.random() < 0.4 });
   }
   return pts;
 }
 
-const clusterPos = (i: number, w: number, h: number) => {
-  const a = -Math.PI / 2 + (i * Math.PI * 2) / 6;
-  return { x: w / 2 + Math.min(w * 0.36, 480) * Math.cos(a), y: h / 2 + 0.07 * h + Math.min(h * 0.3, 300) * Math.sin(a) };
-};
 const orbitPos = (i: number, w: number, h: number) => {
   const a = -Math.PI / 2 + (i * Math.PI * 2) / 6;
-  return { x: w / 2 + Math.min(w * 0.24, 320) * Math.cos(a), y: h / 2 + Math.min(h * 0.22, 210) * Math.sin(a) };
+  return { x: w / 2 + Math.min(w * 0.3, 420) * Math.cos(a), y: h / 2 + Math.min(h * 0.26, 260) * Math.sin(a) };
 };
 
 export default function DustStory({ className, particleCount = 3000, pinLength = 3.8, showLines = true }: {
@@ -83,15 +79,14 @@ export default function DustStory({ className, particleCount = 3000, pinLength =
       if (canvas.width !== Math.round(w * dpr)) { canvas.width = w * dpr; canvas.height = h * dpr; }
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      const e1 = smooth((p - 0.2) / 0.3);   // sphere → clusters
-      const e2 = smooth((p - 0.7) / 0.24);  // clusters → hub
-      const burst = Math.sin(Math.PI * e1) * Math.min(w, h) * 0.22;
+      const e1 = smooth((p - 0.15) / 0.3);  // sphere → FutureX atom (hub halo)
+      const e2 = smooth((p - 0.5) / 0.3);   // atom → 6 model nodes branch out
       const spin = reduce ? 0 : t * 0.15;
       const tilt = 0.35, cosT = Math.cos(tilt), sinT = Math.sin(tilt), cosA = Math.cos(spin), sinA = Math.sin(spin);
-      const R = Math.min(w, h) * (0.3 + 0.06 * smooth(p / 0.2));
+      const R = Math.min(w, h) * (0.3 + 0.06 * smooth(p / 0.15));
       const Rh = Math.min(w, h) * 0.13, CR = Math.min(w, h) * 0.085;
       const cx = w / 2, cy = h / 2, cspin = t * 0.5;
-      const clusters = MODELS.map((_, i) => clusterPos(i, w, h));
+      const clusters = MODELS.map((_, i) => orbitPos(i, w, h));
       const fade = 1 - smooth((p - 0.9) / 0.1) * 0.35;
 
       for (const q of pts.current) {
@@ -106,30 +101,33 @@ export default function DustStory({ className, particleCount = 3000, pinLength =
         const hy2 = q.hy * cosT - hz1 * sinT, hz2 = q.hy * sinT + hz1 * cosT;
         const hs = 3 / (3 - hz2);
         const ux = cx + hx1 * hs * Rh, uy = cy + hy2 * hs * Rh, ud = (hz2 + 1) / 2;
-        let px = sx + (tx - sx) * e1, py = sy + (ty - sy) * e1, pd = depth + (td - depth) * e1;
-        if (burst > 0) { const dx = px - cx, dy = py - cy, len = Math.hypot(dx, dy) || 1; px += (dx / len) * burst * q.jit; py += (dy / len) * burst * q.jit; }
-        px += (ux - px) * e2; py += (uy - py) * e2; pd += (ud - pd) * e2;
+        let px = sx + (ux - sx) * e1, py = sy + (uy - sy) * e1, pd = depth + (ud - depth) * e1;
+        if (q.out) {
+          // Stream out along the spoke with a slight per-particle lag so it reads as a flow, not a jump.
+          const k = smooth((e2 - (1 - q.jit) * 0.6) / 0.85);
+          px += (tx - px) * k; py += (ty - py) * k; pd += (td - pd) * k;
+        }
         ctx.fillStyle = `rgba(255,255,255,${Math.min(1, 0.08 + pd * 0.75) * fade})`;
         ctx.fillRect(px * dpr, py * dpr, (0.6 + pd * 1.1) * dpr, (0.6 + pd * 1.1) * dpr);
       }
 
-      const nodeOp = smooth((p - 0.38) / 0.14), hubOp = smooth((p - 0.84) / 0.12);
+      const hubOp = smooth((p - 0.3) / 0.15), nodeOp = smooth((p - 0.52) / 0.12);
       nodeRefs.current.forEach((el, i) => {
         if (!el) return;
-        const a = clusterPos(i, w, h), b = orbitPos(i, w, h);
-        const x = a.x + (b.x - a.x) * e2, y = a.y + (b.y - a.y) * e2 + (reduce ? 0 : Math.sin(t * 1.1 + i * 1.3) * 4);
-        el.style.transform = `translate(${x - w / 2}px, ${y - h / 2}px) translate(-50%,-50%) scale(${(0.9 + 0.1 * nodeOp) * (1 - 0.18 * e2)})`;
+        const b = orbitPos(i, w, h);
+        const x = cx + (b.x - cx) * e2, y = cy + (b.y - cy) * e2 + (reduce ? 0 : Math.sin(t * 1.1 + i * 1.3) * 4 * e2);
+        el.style.transform = `translate(${x - w / 2}px, ${y - h / 2}px) translate(-50%,-50%) scale(${0.5 + 0.32 * e2})`;
         el.style.opacity = String(nodeOp);
         el.style.borderColor = e2 > 0.95 ? "rgba(52,198,247,.35)" : "rgba(255,255,255,.1)";
         const ln = lineRefs.current[i];
         if (ln) { ln.setAttribute("x1", String(w / 2)); ln.setAttribute("y1", String(h / 2)); ln.setAttribute("x2", String(x)); ln.setAttribute("y2", String(y)); }
       });
-      if (linesRef.current) linesRef.current.style.opacity = String(showLines ? hubOp : 0);
+      if (linesRef.current) linesRef.current.style.opacity = String(showLines ? nodeOp : 0);
       if (hubRef.current) { hubRef.current.style.opacity = String(hubOp); hubRef.current.style.transform = `translate(-50%,-50%) scale(${0.8 + 0.2 * hubOp}) translateY(${reduce ? 0 : Math.sin(t * 0.8) * 4}px)`; }
       if (pulseRef.current) { const k = (t * 0.9) % 1; pulseRef.current.style.opacity = String(hubOp * (1 - k) * 0.8); pulseRef.current.style.transform = `scale(${1 + k * 0.6})`; }
       if (introRef.current) { const o = 1 - smooth((p - 0.08) / 0.12); introRef.current.style.opacity = String(o); introRef.current.style.transform = `translateY(${(1 - o) * 30}px)`; }
       if (headRef.current) { const r = smooth((p - 0.3) / 0.22); headRef.current.style.clipPath = `inset(0 ${(1 - r) * 100}% -10% 0)`; headRef.current.style.transform = `translateY(${-e2 * 2}vh)`; }
-      if (outroRef.current) { outroRef.current.style.opacity = String(hubOp); outroRef.current.style.transform = `translateY(${(1 - hubOp) * 24}px)`; }
+      if (outroRef.current) { const o = smooth((p - 0.82) / 0.12); outroRef.current.style.opacity = String(o); outroRef.current.style.transform = `translateY(${(1 - o) * 24}px)`; }
     };
 
     const loop = (now: number) => { frame = requestAnimationFrame(loop); if (visible) draw(now / 1000); };
