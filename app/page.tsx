@@ -9,6 +9,7 @@ import {
   GraduationCap,
   Layers,
   Sparkles,
+  Target,
 } from "lucide-react";
 import Hero from "@/components/Hero";
 import DustStory from "@/components/DustStory";
@@ -71,6 +72,61 @@ export default function Home() {
     <>
       <Hero />
       <DustStory />
+
+      {/* Skill check CTA */}
+      <Section>
+        <Container>
+          <FadeIn>
+            <SpotlightCard innerClassName="grid gap-10 p-7 md:p-12 lg:grid-cols-12 lg:items-center">
+              <div className="lg:col-span-7">
+                <SectionHeader
+                  eyebrow="Free · about 5 minutes"
+                  icon={<Target />}
+                  title="Test your skills."
+                  description="A short quiz that starts easy and gets harder as you go. It stops when it finds your ceiling, then tells you which FutureX level to start with."
+                />
+                <ButtonLink href="/skill-check" size="lg" arrow="right" className="mt-8">
+                  Take the skill check
+                </ButtonLink>
+              </div>
+              <ol className="space-y-2.5 lg:col-span-5" aria-label="Example result">
+                {[1, 2, 3, 4].map((l) => {
+                  const done = l < 3, current = l === 3;
+                  return (
+                    <li
+                      key={l}
+                      className={`flex items-center gap-4 rounded-2xl border p-4 ${
+                        current ? "border-accent/30 bg-accent/[0.07]" : "border-white/8 bg-ink/40"
+                      }`}
+                    >
+                      <span
+                        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full border font-display text-sm font-bold ${
+                          current
+                            ? "border-accent bg-accent text-ink shadow-[0_0_24px_rgba(52,198,247,0.45)]"
+                            : done
+                              ? "border-accent/50 bg-accent/15 text-accent"
+                              : "border-white/15 text-sky-dim"
+                        }`}
+                      >
+                        {done ? <Check className="h-4 w-4" aria-hidden /> : l}
+                      </span>
+                      <span className="min-w-0">
+                        <span className="block font-mono text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-sky-dim">
+                          Level {l}
+                          {current && " · Your match"}
+                        </span>
+                        <span className={`block truncate text-sm ${current ? "text-white" : "text-body-soft"}`}>
+                          {courses.find((c) => c.level === l)?.shortName}
+                        </span>
+                      </span>
+                    </li>
+                  );
+                })}
+              </ol>
+            </SpotlightCard>
+          </FadeIn>
+        </Container>
+      </Section>
 
       {/* What we do: bento */}
       <Section>
