@@ -11,18 +11,18 @@ import {
   Sparkles,
 } from "lucide-react";
 import Hero from "@/components/Hero";
-import MasterApi from "@/components/MasterApi";
+import DustStory from "@/components/DustStory";
 import { courses, services } from "@/lib/data";
 import { Accordion } from "@/components/ui/accordion";
 import { Chip } from "@/components/ui/badge";
 import { ButtonLink } from "@/components/ui/button";
 import { CTASection } from "@/components/ui/cta-section";
-import { LevelLadder } from "@/components/ui/level-ladder";
+import { LevelLadderPinned } from "@/components/ui/level-ladder-pinned";
+import { PosterRail } from "@/components/ui/poster-rail";
 import { Container, Section, SectionHeader } from "@/components/ui/section";
-import { ScannerCardStream } from "@/components/ui/scanner-card-stream";
 import { SpotlightCard } from "@/components/ui/spotlight-card";
 import { FadeIn, Stagger, StaggerItem } from "@/components/ui/text";
-import { Aurora, GridPattern, Hairline } from "@/components/ui/background";
+import { Aurora, GridPattern } from "@/components/ui/background";
 
 const roles = Array.from(new Set(courses.flatMap((c) => c.roles)));
 
@@ -70,7 +70,7 @@ export default function Home() {
   return (
     <>
       <Hero />
-      <MasterApi />
+      <DustStory />
 
       {/* What we do: bento */}
       <Section>
@@ -171,29 +171,25 @@ export default function Home() {
       </Section>
 
       {/* Ladder */}
-      <Section className="overflow-hidden">
-        <Container className="relative">
+      <LevelLadderPinned
+        header={
           <SectionHeader
             eyebrow="The certification ladder"
             icon={<GraduationCap />}
             title="Four levels. One continuous climb."
-            description="Start with tools, move on to building, then shipping, then operating models at scale. Each level maps to named job roles."
             action={
               <ButtonLink href="/courses" variant="secondary" arrow="right">
                 All five programs
               </ButtonLink>
             }
           />
-          <div className="mt-14">
-            <LevelLadder />
-          </div>
-        </Container>
-      </Section>
+        }
+      />
 
       {/* Poster gallery */}
-      <section className="relative overflow-hidden bg-paper/50 py-20 md:py-28">
-        <Hairline className="absolute inset-x-0 top-0" />
-        <Container>
+      <PosterRail
+        cards={posters}
+        header={
           <SectionHeader
             eyebrow="From the studio"
             icon={<Sparkles />}
@@ -205,11 +201,8 @@ export default function Home() {
               </ButtonLink>
             }
           />
-        </Container>
-        <div className="mt-10">
-          <ScannerCardStream cards={posters} cardWidth={240} cardHeight={320} cardGap={40} />
-        </div>
-      </section>
+        }
+      />
 
       {/* FAQ */}
       <Section>

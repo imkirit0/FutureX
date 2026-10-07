@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
-import { BlurIn, FadeIn } from "@/components/ui/text";
+import { FadeIn } from "@/components/ui/text";
+import { WipeIn } from "@/components/ui/wipe-in";
 
 export function Container({
   children,
@@ -80,7 +81,7 @@ export function SectionHeader({
             </Badge>
           </FadeIn>
         )}
-        <BlurIn
+        <WipeIn
           as="h2"
           text={title}
           className="font-display text-balance text-3xl font-bold tracking-[-0.02em] text-white sm:text-4xl md:text-[2.75rem] md:leading-[1.08]"
