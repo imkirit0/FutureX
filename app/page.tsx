@@ -1,8 +1,6 @@
-import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowRight,
-  BookOpenCheck,
   Bot,
   BrainCircuit,
   Briefcase,
@@ -10,25 +8,22 @@ import {
   FlaskConical,
   GraduationCap,
   Layers,
-  MessageSquareQuote,
-  ShieldCheck,
   Sparkles,
 } from "lucide-react";
 import Hero from "@/components/Hero";
+import MasterApi from "@/components/MasterApi";
 import { courses, services } from "@/lib/data";
 import { Accordion } from "@/components/ui/accordion";
-import { Badge, Chip } from "@/components/ui/badge";
+import { Chip } from "@/components/ui/badge";
 import { ButtonLink } from "@/components/ui/button";
-import { ChatMock } from "@/components/ui/chat-mock";
 import { CTASection } from "@/components/ui/cta-section";
 import { LevelLadder } from "@/components/ui/level-ladder";
-import { Marquee } from "@/components/ui/marquee";
 import { Container, Section, SectionHeader } from "@/components/ui/section";
+import { ScannerCardStream } from "@/components/ui/scanner-card-stream";
 import { SpotlightCard } from "@/components/ui/spotlight-card";
 import { FadeIn, Stagger, StaggerItem } from "@/components/ui/text";
-import { Aurora, DotPattern, GridPattern, Glow, Hairline } from "@/components/ui/background";
+import { Aurora, GridPattern, Hairline } from "@/components/ui/background";
 
-const tools = Array.from(new Set(courses.flatMap((c) => c.tools)));
 const roles = Array.from(new Set(courses.flatMap((c) => c.roles)));
 
 const serviceIcons = [GraduationCap, Bot, BrainCircuit];
@@ -71,49 +66,13 @@ const faqs = [
   },
 ];
 
-const vibeyChat = [
-  { from: "student" as const, text: "What's 3/4 of 240?" },
-  { from: "vibey" as const, text: "Let's take it one quarter at a time. What is 1/4 of 240?" },
-  { from: "student" as const, text: "240 ÷ 4… that's 60." },
-  { from: "vibey" as const, text: "Right. So if one quarter is 60, how much would three quarters be?" },
-  { from: "student" as const, text: "60 × 3 = 180!" },
-];
-
 export default function Home() {
   return (
     <>
       <Hero />
+      <MasterApi />
 
-      {/* Tools & roles marquee */}
-      <section className="relative border-y border-white/8 bg-ink py-10">
-        <Container className="mb-6 flex items-center justify-center">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-sky-dim">
-            Tools and roles across the five programs
-          </p>
-        </Container>
-        <div className="space-y-4">
-          <Marquee duration="55s">
-            {tools.map((t) => (
-              <span
-                key={t}
-                className="flex items-center gap-2.5 rounded-full border border-white/10 bg-white/[0.03] px-4 py-2 text-sm font-medium text-body"
-              >
-                <span className="h-1.5 w-1.5 rounded-full bg-accent" aria-hidden />
-                {t}
-              </span>
-            ))}
-          </Marquee>
-          <Marquee duration="70s" reverse>
-            {roles.map((r) => (
-              <span key={r} className="whitespace-nowrap text-sm font-medium text-sky-dim">
-                {r}
-              </span>
-            ))}
-          </Marquee>
-        </div>
-      </section>
-
-      {/* What we do — bento */}
+      {/* What we do: bento */}
       <Section>
         <GridPattern size={64} mask="radial-gradient(ellipse 50% 50% at 100% 0%, #000 10%, transparent 100%)" />
         <Container className="relative">
@@ -212,8 +171,7 @@ export default function Home() {
       </Section>
 
       {/* Ladder */}
-      <Section tone="paper" className="overflow-hidden">
-        <Glow className="left-1/2 top-0 h-[30rem] w-[70rem] -translate-x-1/2 -translate-y-1/2" color="rgba(32,104,216,0.18)" />
+      <Section className="overflow-hidden">
         <Container className="relative">
           <SectionHeader
             eyebrow="The certification ladder"
@@ -232,65 +190,8 @@ export default function Home() {
         </Container>
       </Section>
 
-      {/* VibeKids */}
-      <Section className="overflow-hidden">
-        <DotPattern mask="radial-gradient(ellipse 50% 60% at 80% 50%, #000 10%, transparent 100%)" />
-        <Container className="relative">
-          <div className="grid items-center gap-12 lg:grid-cols-12 lg:gap-16">
-            <div className="lg:col-span-6">
-              <FadeIn>
-                <Badge icon={<MessageSquareQuote />} className="mb-5">
-                  VibeKids · Grades 3–12
-                </Badge>
-              </FadeIn>
-              <FadeIn delay={0.08}>
-                <h2 className="font-display text-balance text-3xl font-bold tracking-[-0.02em] text-white sm:text-4xl md:text-[2.75rem] md:leading-[1.08]">
-                  An AI tutor that asks the next question instead of giving the answer.
-                </h2>
-              </FadeIn>
-              <FadeIn delay={0.16}>
-                <p className="mt-5 text-lg leading-relaxed text-body-soft">
-                  Vibey, the Socratic engine inside VibeKids, guides students through reasoning step by
-                  step. It maps how each child thinks, finds the foundational gap that is actually
-                  blocking them, and routes practice there before coming back to today&apos;s problem.
-                </p>
-              </FadeIn>
-              <Stagger className="mt-8 grid gap-3 sm:grid-cols-2" delay={0.2}>
-                {[
-                  { Icon: BrainCircuit, t: "Real-time cognitive mapping" },
-                  { Icon: BookOpenCheck, t: "Aligned to CBSE, NEP 2020, NCF-SE 2023" },
-                  { Icon: ShieldCheck, t: "Dashboards for schools, teachers, parents" },
-                  { Icon: Sparkles, t: "AI literacy and virtual STEM labs" },
-                ].map(({ Icon, t }) => (
-                  <StaggerItem key={t}>
-                    <div className="flex items-center gap-3 rounded-xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm font-medium text-body">
-                      <Icon className="h-4 w-4 shrink-0 text-accent" aria-hidden />
-                      {t}
-                    </div>
-                  </StaggerItem>
-                ))}
-              </Stagger>
-              <FadeIn delay={0.3} className="mt-9 flex flex-wrap gap-3">
-                <ButtonLink href="/vibekids" arrow="right">
-                  Explore VibeKids
-                </ButtonLink>
-                <ButtonLink href="/contact" variant="secondary">
-                  Book a school demo
-                </ButtonLink>
-              </FadeIn>
-            </div>
-            <div className="relative lg:col-span-6">
-              <Glow className="inset-x-10 top-10 h-[70%]" color="rgba(52,198,247,0.22)" />
-              <FadeIn delay={0.15} blur>
-                <ChatMock messages={vibeyChat} subtitle="Socratic AI tutor · Class 6 Maths" />
-              </FadeIn>
-            </div>
-          </div>
-        </Container>
-      </Section>
-
       {/* Poster gallery */}
-      <section className="relative overflow-hidden bg-paper py-20 md:py-28">
+      <section className="relative overflow-hidden bg-paper/50 py-20 md:py-28">
         <Hairline className="absolute inset-x-0 top-0" />
         <Container>
           <SectionHeader
@@ -305,27 +206,8 @@ export default function Home() {
             }
           />
         </Container>
-        <div className="mt-14">
-          <Marquee duration="90s" gap="1.25rem">
-            {posters.map((p) => (
-              <figure
-                key={p.src}
-                className="group relative aspect-[3/4] w-[16rem] shrink-0 overflow-hidden rounded-2xl border border-white/10 bg-ink-2 shadow-card transition-transform duration-500 hover:-translate-y-2 sm:w-[18rem]"
-              >
-                <Image
-                  src={p.src}
-                  alt={p.alt}
-                  fill
-                  sizes="288px"
-                  className="object-cover transition-transform duration-700 group-hover:scale-105"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-ink/80 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-                <figcaption className="absolute inset-x-0 bottom-0 translate-y-3 p-4 text-sm font-medium text-white opacity-0 transition-all duration-500 group-hover:translate-y-0 group-hover:opacity-100">
-                  {p.alt}
-                </figcaption>
-              </figure>
-            ))}
-          </Marquee>
+        <div className="mt-10">
+          <ScannerCardStream cards={posters} cardWidth={240} cardHeight={320} cardGap={40} />
         </div>
       </section>
 

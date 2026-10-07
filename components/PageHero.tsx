@@ -25,7 +25,7 @@ export default function PageHero({
   compact?: boolean;
 }) {
   return (
-    <section className={cn("relative overflow-hidden bg-ink pt-32 md:pt-40", compact ? "pb-10 md:pb-14" : "pb-16 md:pb-20")}>
+    <section className={cn("relative overflow-hidden pt-32 md:pt-40", compact ? "pb-10 md:pb-14" : "pb-16 md:pb-20")}>
       <GridPattern />
       <Glow className="-top-40 left-1/2 h-[28rem] w-[60rem] -translate-x-1/2" color="rgba(32,104,216,0.22)" />
       <Container className="relative">

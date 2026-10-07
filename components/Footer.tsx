@@ -14,20 +14,20 @@ const socialLinks = [
 
 export default function Footer() {
   return (
-    <footer className="relative overflow-hidden bg-ink">
+    <footer className="relative overflow-hidden">
       <Hairline />
       <Container className="relative pb-10 pt-16 md:pt-20">
         <div className="grid gap-12 md:grid-cols-12">
           <div className="md:col-span-5">
             <Image
               src="/img/logo-white.png"
-              alt="FutureX — G-TEC AI Lab"
+              alt="FutureX, G-TEC AI Lab"
               width={180}
               height={40}
               className="h-9 w-auto"
             />
             <p className="mt-6 max-w-sm text-[0.98rem] leading-relaxed text-body-soft">
-              An initiative of G-TEC Education. We make AI education accessible, practical, and
+              An initiative of G-TEC EDUCATION. We make AI education accessible, practical, and
               career-focused for students, professionals, and schools.
             </p>
             <div className="mt-7 flex items-center gap-2">
@@ -69,7 +69,7 @@ export default function Footer() {
           <p>© {new Date().getFullYear()} FutureX AI Lab. All rights reserved.</p>
           <p className="flex items-center gap-2">
             <span className="h-1.5 w-1.5 rounded-full bg-accent" aria-hidden />
-            An initiative of G-TEC Education
+            An initiative of G-TEC EDUCATION
           </p>
         </div>
       </Container>

@@ -37,7 +37,7 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
   return (
     <>
       {/* Hero */}
-      <section className="relative overflow-hidden bg-ink pb-16 pt-32 md:pt-40">
+      <section className="relative overflow-hidden pb-16 pt-32 md:pt-40">
         <GridPattern />
         <Glow className="-top-40 right-0 h-[30rem] w-[40rem]" color="rgba(32,104,216,0.22)" />
         <Container className="relative">

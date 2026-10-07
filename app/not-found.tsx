@@ -6,7 +6,7 @@ import { Aurora, GridPattern } from "@/components/ui/background";
 
 export default function NotFound() {
   return (
-    <section className="relative flex min-h-[80vh] items-center overflow-hidden bg-ink pt-24">
+    <section className="relative flex min-h-[80vh] items-center overflow-hidden pt-24">
       <Aurora intensity={0.8} />
       <GridPattern />
       <Container className="relative text-center">

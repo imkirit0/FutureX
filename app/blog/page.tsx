@@ -11,7 +11,7 @@ import { FadeIn, Stagger, StaggerItem } from "@/components/ui/text";
 import { Aurora, GridPattern } from "@/components/ui/background";
 
 export const metadata: Metadata = {
-  title: "Blog — The Lab Notebook",
+  title: "Blog: The Lab Notebook",
   description:
     "Notes from FutureX AI Lab on AI literacy, careers, RAG systems, Socratic AI, and the technologies shaping education.",
 };

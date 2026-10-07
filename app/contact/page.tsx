@@ -81,9 +81,9 @@ export default function ContactPage() {
                     <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/[0.05] text-accent">
                       <Building2 className="h-5 w-5" aria-hidden />
                     </span>
-                    <h2 className="font-display mt-5 text-xl font-bold text-white">Backed by G-TEC Education</h2>
+                    <h2 className="font-display mt-5 text-xl font-bold text-white">Backed by G-TEC EDUCATION</h2>
                     <p className="mt-2 text-[0.95rem] leading-relaxed text-body-soft">
-                      FutureX AI Lab is an initiative of G-TEC Education, bringing AI programs to
+                      FutureX AI Lab is an initiative of G-TEC EDUCATION, bringing AI programs to
                       students, professionals, and schools through its education network.
                     </p>
                   </div>

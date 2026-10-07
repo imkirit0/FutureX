@@ -80,7 +80,7 @@ export function FadeIn({
   );
 }
 
-/* Staggered children — wrap a list in <Stagger>, each child in <StaggerItem>. */
+/* Staggered children: wrap a list in <Stagger>, each child in <StaggerItem>. */
 export function Stagger({
   children,
   className,

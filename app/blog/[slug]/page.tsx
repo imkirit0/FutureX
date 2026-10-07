@@ -32,7 +32,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
   return (
     <>
       <ReadingProgress />
-      <section className="relative overflow-hidden bg-ink pb-12 pt-32 md:pt-40">
+      <section className="relative overflow-hidden pb-12 pt-32 md:pt-40">
         <GridPattern />
         <Glow className="-top-32 left-1/2 h-[24rem] w-[50rem] -translate-x-1/2" color="rgba(32,104,216,0.2)" />
         <Container size="narrow" className="relative">

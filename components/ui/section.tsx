@@ -35,8 +35,8 @@ export function Section({
   tone?: "ink" | "paper" | "transparent";
 }) {
   const tones = {
-    ink: "bg-ink",
-    paper: "bg-paper",
+    ink: "",
+    paper: "bg-paper/50",
     transparent: "",
   };
   return (

@@ -7,6 +7,7 @@ import {
   Check,
   FlaskConical,
   GraduationCap,
+  MessageSquareQuote,
   School,
   ShieldCheck,
   Sparkles,
@@ -24,7 +25,7 @@ import { FadeIn, Stagger, StaggerItem } from "@/components/ui/text";
 import { DotPattern, Glow, GridPattern, Hairline } from "@/components/ui/background";
 
 export const metadata: Metadata = {
-  title: "VibeKids — Socratic AI Learning for Grades 3–12",
+  title: "VibeKids: Socratic AI Learning for Grades 3–12",
   description:
     "VibeKids is an AI-powered interactive learning system for grades 3–12. Vibey, its Socratic AI engine, guides reasoning instead of giving answers.",
 };
@@ -67,6 +68,14 @@ const compliance = [
   { label: "CBSE Circular Acad-15/2026", body: "Computational thinking and AI as part of the school mandate." },
   { label: "NEP 2020", body: "Competency-based, learner-centred education policy." },
   { label: "NCF-SE 2023", body: "National Curriculum Framework for School Education." },
+];
+
+const vibeyChat = [
+  { from: "student" as const, text: "What's 3/4 of 240?" },
+  { from: "vibey" as const, text: "Let's take it one quarter at a time. What is 1/4 of 240?" },
+  { from: "student" as const, text: "240 ÷ 4… that's 60." },
+  { from: "vibey" as const, text: "Right. So if one quarter is 60, how much would three quarters be?" },
+  { from: "student" as const, text: "60 × 3 = 180!" },
 ];
 
 const chat = [
@@ -115,6 +124,59 @@ export default function VibeKidsPage() {
           </div>
         }
       />
+
+      {/* VibeKids */}
+      <Section className="overflow-hidden">
+        <DotPattern mask="radial-gradient(ellipse 50% 60% at 80% 50%, #000 10%, transparent 100%)" />
+        <Container className="relative">
+          <div className="grid items-center gap-12 lg:grid-cols-12 lg:gap-16">
+            <div className="lg:col-span-6">
+              <FadeIn>
+                <Badge icon={<MessageSquareQuote />} className="mb-5">
+                  VibeKids · Grades 3–12
+                </Badge>
+              </FadeIn>
+              <FadeIn delay={0.08}>
+                <h2 className="font-display text-balance text-3xl font-bold tracking-[-0.02em] text-white sm:text-4xl md:text-[2.75rem] md:leading-[1.08]">
+                  An AI tutor that asks the next question instead of giving the answer.
+                </h2>
+              </FadeIn>
+              <FadeIn delay={0.16}>
+                <p className="mt-5 text-lg leading-relaxed text-body-soft">
+                  Vibey, the Socratic engine inside VibeKids, guides students through reasoning step by
+                  step. It maps how each child thinks, finds the foundational gap that is actually
+                  blocking them, and routes practice there before coming back to today&apos;s problem.
+                </p>
+              </FadeIn>
+              <Stagger className="mt-8 grid gap-3 sm:grid-cols-2" delay={0.2}>
+                {[
+                  { Icon: BrainCircuit, t: "Real-time cognitive mapping" },
+                  { Icon: BookOpenCheck, t: "Aligned to CBSE, NEP 2020, NCF-SE 2023" },
+                  { Icon: ShieldCheck, t: "Dashboards for schools, teachers, parents" },
+                  { Icon: Sparkles, t: "AI literacy and virtual STEM labs" },
+                ].map(({ Icon, t }) => (
+                  <StaggerItem key={t}>
+                    <div className="flex items-center gap-3 rounded-xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm font-medium text-body">
+                      <Icon className="h-4 w-4 shrink-0 text-accent" aria-hidden />
+                      {t}
+                    </div>
+                  </StaggerItem>
+                ))}
+              </Stagger>
+              <FadeIn delay={0.3} className="mt-9 flex flex-wrap gap-3">
+                <ButtonLink href="/contact" arrow="right">
+                  Book a school demo
+                </ButtonLink>
+              </FadeIn>
+            </div>
+            <div className="relative lg:col-span-6">
+              <FadeIn delay={0.15} blur>
+                <ChatMock messages={vibeyChat} subtitle="Socratic AI tutor · Class 6 Maths" />
+              </FadeIn>
+            </div>
+          </div>
+        </Container>
+      </Section>
 
       {/* How Vibey teaches */}
       <Section id="how" className="overflow-hidden">

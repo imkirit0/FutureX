@@ -68,7 +68,7 @@ export function Aurora({ className, intensity = 1 }: { className?: string; inten
   );
 }
 
-/* Single radial glow — place behind a focal element. */
+/* Single radial glow; place behind a focal element. */
 export function Glow({
   className,
   color = "rgba(52,198,247,0.35)",
@@ -85,7 +85,7 @@ export function Glow({
   );
 }
 
-/* Hairline divider with a bright centre — section separator. */
+/* Hairline divider with a bright centre, used as a section separator. */
 export function Hairline({ className }: { className?: string }) {
   return (
     <div

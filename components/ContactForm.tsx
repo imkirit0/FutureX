@@ -26,10 +26,10 @@ export default function ContactForm() {
     const name = String(data.get("name") ?? "");
     const email = String(data.get("email") ?? "");
     const message = String(data.get("message") ?? "");
-    const text = `${interest}\n\n${message}\n\n— ${name} (${email})`;
+    const text = `${interest}\n\n${message}\n\nFrom: ${name} (${email})`;
 
     if (ENQUIRY_EMAIL) {
-      const subject = encodeURIComponent(`${interest} — ${name}`);
+      const subject = encodeURIComponent(`${interest}: ${name}`);
       const body = encodeURIComponent(`${message}\n\nFrom: ${name} <${email}>`);
       window.location.href = `mailto:${ENQUIRY_EMAIL}?subject=${subject}&body=${body}`;
     }

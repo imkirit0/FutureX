@@ -49,15 +49,17 @@ export default function Nav() {
           transition={{ duration: 0.7, ease: EASE_OUT }}
           className={cn(
             "fx-motion mx-auto flex h-14 max-w-6xl items-center justify-between rounded-full border px-3 pl-4 transition-all duration-500 sm:h-16 sm:pl-5",
-            scrolled || open
+            pathname.startsWith("/skill-check")
+              ? "border-white/10 bg-[#0b1427] shadow-[0_14px_40px_-18px_rgba(11,20,39,0.55)]"
+              : scrolled || open
               ? "border-white/10 bg-ink/75 shadow-[0_10px_40px_-15px_rgba(0,0,0,0.8)] backdrop-blur-xl"
               : "border-transparent bg-transparent"
           )}
         >
-          <Link href="/" className="flex shrink-0 items-center" aria-label="FutureX AI Lab — home">
+          <Link href="/" className="flex shrink-0 items-center" aria-label="FutureX AI Lab home">
             <Image
               src="/img/logo-white.png"
-              alt="FutureX — G-TEC AI Lab"
+              alt="FutureX, G-TEC AI Lab"
               width={170}
               height={38}
               priority

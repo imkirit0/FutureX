@@ -14,6 +14,7 @@ import {
   Users,
 } from "lucide-react";
 import PageHero from "@/components/PageHero";
+import { DustSphere } from "@/components/ui/dust-sphere";
 import { careerTracks, courses } from "@/lib/data";
 import { Badge, Chip } from "@/components/ui/badge";
 import { ButtonLink } from "@/components/ui/button";
@@ -23,12 +24,12 @@ import { Container, Section, SectionHeader } from "@/components/ui/section";
 import { SpotlightCard } from "@/components/ui/spotlight-card";
 import { FadeIn, Stagger, StaggerItem } from "@/components/ui/text";
 import { Timeline } from "@/components/ui/timeline";
-import { Glow, GridPattern, Hairline } from "@/components/ui/background";
+import { GridPattern, Hairline } from "@/components/ui/background";
 
 export const metadata: Metadata = {
   title: "About",
   description:
-    "FutureX AI Lab, an initiative of G-TEC Education, makes AI education accessible, practical, and career-focused for students, professionals, and schools.",
+    "FutureX AI Lab, an initiative of G-TEC EDUCATION, makes AI education accessible, practical, and career-focused for students, professionals, and schools.",
 };
 
 const objectives = [
@@ -82,7 +83,7 @@ export default function AboutPage() {
         eyebrow="About FutureX AI Lab"
         icon={<Compass />}
         title="Making AI education practical, accessible, and career-focused."
-        description="FutureX AI Lab is an initiative of G-TEC Education. We train learners to design, build, and deploy AI-powered solutions across generative AI, large language models, vision AI, and AI agents."
+        description="FutureX AI Lab is an initiative of G-TEC EDUCATION. We train learners to design, build, and deploy AI-powered solutions across generative AI, large language models, vision AI, and AI agents."
         actions={
           <>
             <ButtonLink href="/courses" arrow="right">
@@ -95,16 +96,19 @@ export default function AboutPage() {
         }
         aside={
           <div className="relative">
-            <Glow className="inset-8" color="rgba(32,104,216,0.35)" />
-            <div className="border-gradient relative aspect-[4/3] overflow-hidden rounded-3xl shadow-card-lg">
-              <Image
-                src="/img/about-hub.png"
-                alt="Light streams converging into a single bright point"
-                fill
-                priority
-                sizes="(min-width: 1024px) 40vw, 100vw"
-                className="object-cover"
-              />
+            <div className="border-gradient relative aspect-[4/3] overflow-hidden rounded-3xl bg-ink-2/70 shadow-card-lg">
+              <DustSphere className="absolute inset-0" radius={0.4} count={2600} interactive intensity={1.2} />
+              <div className="absolute left-1/2 top-[44%] w-[34%] -translate-x-1/2 -translate-y-1/2 animate-float">
+                <Image
+                  src="/img/fx-globe.png"
+                  alt="The FutureX globe at the centre of a sphere of particles"
+                  width={582}
+                  height={684}
+                  priority
+                  sizes="(min-width: 1024px) 15vw, 34vw"
+                  className="h-auto w-full drop-shadow-[0_24px_40px_rgba(0,0,0,0.6)]"
+                />
+              </div>
               <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-ink/80 to-transparent p-5">
                 <p className="text-sm font-medium text-white">A hub of AI innovation and talent</p>
                 <p className="text-xs text-body-soft">Our vision for FutureX</p>
@@ -201,7 +205,7 @@ export default function AboutPage() {
       </Section>
 
       {/* Image band */}
-      <section className="relative flex min-h-[60svh] items-center overflow-hidden bg-ink">
+      <section className="relative flex min-h-[60svh] items-center overflow-hidden">
         <Image
           src="/img/hands.jpg"
           alt="A human hand and a robotic hand reaching toward each other in front of the FutureX mark"

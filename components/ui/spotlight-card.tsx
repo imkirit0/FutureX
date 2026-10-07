@@ -4,7 +4,7 @@ import { useRef } from "react";
 import { cn } from "@/lib/utils";
 
 /* Card whose border and surface light up around the cursor.
-   Pure CSS variables — no re-render on mouse move. */
+   Pure CSS variables, no re-render on mouse move. */
 export function SpotlightCard({
   children,
   className,

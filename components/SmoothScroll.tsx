@@ -4,7 +4,7 @@ import { useReducedMotion } from "@/lib/use-reduced-motion";
 import { ReactLenis } from "lenis/react";
 
 
-/* Inertia smooth-scroll — the single biggest "premium feel" upgrade.
+/* Inertia smooth-scroll: the single biggest "premium feel" upgrade.
    Disabled under reduced-motion so it never fights assistive tech. */
 export default function SmoothScroll({ children }: { children: React.ReactNode }) {
   const reduce = useReducedMotion();

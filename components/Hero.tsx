@@ -1,138 +1,134 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
-import { ArrowDown, Sparkles } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { ButtonLink } from "@/components/ui/button";
-import { Container } from "@/components/ui/section";
-import { WordRotate } from "@/components/ui/text";
-import { VideoFrame } from "@/components/ui/video-frame";
-import { Aurora, GridPattern } from "@/components/ui/background";
-import { EASE_OUT } from "@/lib/utils";
+import {
+  motion,
+  useReducedMotion,
+  useScroll,
+  useTransform,
+  useMotionValue,
+  useMotionTemplate,
+} from "framer-motion";
+import { useEffect, useRef } from "react";
 
-const facts = ["4 certification levels", "5 programs", "Labs, capstones & career support", "VibeKids for grades 3–12"];
+const EASE = [0.16, 1, 0.3, 1] as const;
+
+// Headline split into words so each can mask-reveal independently.
+const LINE = [
+  { t: "Your" },
+  { t: "ascent" },
+  { t: "into" },
+  { t: "artificial", accent: true },
+  { t: "intelligence", accent: true },
+  { t: "starts" },
+  { t: "here." },
+];
 
 export default function Hero() {
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
-  const item = (delay: number) => ({
-    className: "fx-motion blur-in",
-    "data-in": mounted,
-    style: { ["--d" as string]: `${delay}s` },
-    initial: { opacity: 0, y: 24 },
-    animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.9, delay, ease: EASE_OUT },
+  const reduce = useReducedMotion();
+  const sectionRef = useRef<HTMLElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  // Cursor-tracked volumetric light
+  const lx = useMotionValue(50);
+  const ly = useMotionValue(40);
+  const light = useMotionTemplate`radial-gradient(600px circle at ${lx}% ${ly}%, rgba(52,198,247,0.10), transparent 60%)`;
+
+  // Scroll-linked parallax: orb drifts + scales, content lifts and fades.
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start start", "end start"],
   });
+  const orbY = useTransform(scrollYProgress, [0, 1], ["0%", "18%"]);
+  const orbScale = useTransform(scrollYProgress, [0, 1], [1, 1.18]);
+  const contentY = useTransform(scrollYProgress, [0, 1], [0, -80]);
+  const contentOpacity = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
+
+  useEffect(() => {
+    if (reduce) return;
+    videoRef.current?.play().catch(() => {});
+  }, [reduce]);
+
+  function onMove(e: React.MouseEvent) {
+    if (reduce || !sectionRef.current) return;
+    const r = sectionRef.current.getBoundingClientRect();
+    lx.set(((e.clientX - r.left) / r.width) * 100);
+    ly.set(((e.clientY - r.top) / r.height) * 100);
+  }
 
   return (
-    <section className="relative overflow-hidden bg-ink pt-36 md:pt-44">
-      {/* Backdrop */}
-      <div aria-hidden className="absolute inset-0">
+    <section
+      ref={sectionRef}
+      onMouseMove={onMove}
+      className="dark-zone relative flex min-h-[100svh] items-center overflow-hidden bg-ink"
+    >
+      {/* Full-bleed brand film, parallaxed */}
+      <motion.div
+        aria-hidden
+        style={reduce ? undefined : { y: orbY, scale: orbScale }}
+        className="absolute inset-0"
+      >
         <video
-          className="absolute inset-0 h-full w-full object-cover opacity-25"
-          src="/video/futurex-loop.mp4"
-          poster="/img/atmosphere.png"
-          autoPlay
+          ref={videoRef}
+          className="h-full w-full object-cover object-[72%_center] opacity-95 md:object-[64%_center]"
+          poster="/video/futurex-poster.jpg"
           muted
           loop
           playsInline
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-ink via-ink/80 to-ink" />
-        <Aurora intensity={0.9} />
-        <GridPattern size={56} mask="radial-gradient(ellipse 60% 55% at 50% 10%, #000 20%, transparent 100%)" />
-      </div>
-
-      <Container className="relative">
-        <div className="mx-auto flex max-w-4xl flex-col items-center text-center">
-          <motion.div {...item(0.05)}>
-            <Badge dot icon={<Sparkles />}>
-              An initiative of G-TEC Education
-            </Badge>
-          </motion.div>
-
-          <motion.h1
-            {...item(0.15)}
-            className="fx-motion blur-in font-display mt-7 text-balance text-[2.75rem] font-bold leading-[1.02] tracking-[-0.03em] text-white sm:text-6xl md:text-7xl lg:text-[5.4rem]"
-          >
-            Build real AI skills, from your first{" "}
-            <WordRotate
-              words={["prompt", "pipeline", "agent", "model"]}
-              wordClassName="text-gradient animate-gradient-x"
-            />{" "}
-            to production.
-          </motion.h1>
-
-          <motion.p
-            {...item(0.3)}
-            className="fx-motion blur-in mt-7 max-w-2xl text-pretty text-lg leading-relaxed text-body-soft md:text-xl"
-          >
-            FutureX AI Lab runs a four-level certification ladder in generative AI, RAG systems,
-            AI agents, and foundation-model operations, alongside VibeKids, a Socratic AI tutor for
-            school students.
-          </motion.p>
-
-          <motion.div {...item(0.42)} className="fx-motion blur-in mt-9 flex flex-wrap items-center justify-center gap-3">
-            <ButtonLink href="/courses" size="lg" arrow="right">
-              Explore programs
-            </ButtonLink>
-            <ButtonLink href="/vibekids" size="lg" variant="secondary">
-              Meet VibeKids
-            </ButtonLink>
-          </motion.div>
-
-          <motion.ul
-            {...item(0.55)}
-            className="fx-motion blur-in mt-10 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-sky-dim"
-          >
-            {facts.map((f) => (
-              <li key={f} className="flex items-center gap-2">
-                <span className="h-1.5 w-1.5 rounded-full bg-accent" aria-hidden />
-                {f}
-              </li>
-            ))}
-          </motion.ul>
-        </div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 60, scale: 0.96 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ duration: 1.1, delay: 0.6, ease: EASE_OUT }}
-          className="fx-motion relative mx-auto mt-16 max-w-5xl md:mt-20"
+          preload="auto"
+          aria-hidden
         >
-          <VideoFrame src="/video/futurex-final.mp4" poster="/video/futurex-poster.jpg">
-            {/* Floating facts */}
-            <div className="pointer-events-none absolute -left-6 top-[18%] hidden animate-float lg:block xl:-left-16">
-              <GlassCard label="Certification ladder" value="L1 → L4" sub="5 programs, one route" />
-            </div>
-            <div className="pointer-events-none absolute -right-6 bottom-[16%] hidden animate-float-slow lg:block xl:-right-16">
-              <GlassCard label="VibeKids" value="Grades 3–12" sub="Socratic AI tutor" />
-            </div>
-          </VideoFrame>
-        </motion.div>
-      </Container>
+          <source src="/video/futurex-loop.mp4" type="video/mp4" />
+        </video>
+      </motion.div>
+
+      {/* Cinematic scrims + cursor light */}
+      <div aria-hidden className="absolute inset-0 bg-gradient-to-r from-ink via-ink/80 to-transparent" />
+      <div aria-hidden className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-b from-transparent to-ink" />
+      <div aria-hidden className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-ink/80 to-transparent" />
+      {!reduce && <motion.div aria-hidden className="absolute inset-0" style={{ background: light }} />}
 
       <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.6, duration: 0.8 }}
-        className="fx-motion relative mt-14 flex justify-center pb-8 text-sky-dim"
-        aria-hidden
+        style={reduce ? undefined : { y: contentY, opacity: contentOpacity }}
+        className="relative mx-auto w-full max-w-7xl px-5 md:px-8"
       >
-        <span className="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.2em]">
-          Scroll <ArrowDown className="h-3.5 w-3.5 animate-bounce" />
-        </span>
-      </motion.div>
-    </section>
-  );
-}
+        <div className="max-w-3xl">
+          <motion.p
+            initial={reduce ? false : { opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, ease: EASE }}
+            className="font-mono text-[0.72rem] tracking-[0.24em] text-accent"
+          >
+            AN INITIATIVE OF G-TEC EDUCATION
+          </motion.p>
 
-function GlassCard({ label, value, sub }: { label: string; value: string; sub: string }) {
-  return (
-    <div className="w-52 rounded-2xl border border-white/10 bg-ink-2/70 p-4 shadow-card-lg backdrop-blur-xl">
-      <p className="text-[0.7rem] font-medium uppercase tracking-[0.14em] text-sky-dim">{label}</p>
-      <p className="font-display mt-1 text-2xl font-bold text-white">{value}</p>
-      <p className="mt-0.5 text-xs text-body-soft">{sub}</p>
-    </div>
+          <h1 className="font-display mt-5 flex flex-wrap gap-x-[0.28em] text-balance text-[2.7rem] font-extrabold leading-[1.03] tracking-[-0.025em] text-white drop-shadow-[0_2px_40px_rgba(7,11,20,0.9)] sm:text-6xl md:text-[4.6rem] xl:text-[5.6rem]">
+            {LINE.map((w, i) => (
+              <span key={i} className="inline-block overflow-hidden pb-[0.12em]">
+                <motion.span
+                  initial={reduce ? false : { y: "110%", filter: "blur(12px)", opacity: 0 }}
+                  animate={{ y: "0%", filter: "blur(0px)", opacity: 1 }}
+                  transition={{ duration: 0.9, delay: 0.15 + i * 0.08, ease: EASE }}
+                  className={`inline-block ${w.accent ? "text-sky" : ""}`}
+                >
+                  {w.t}
+                </motion.span>
+              </span>
+            ))}
+          </h1>
+
+          <motion.p
+            initial={reduce ? false : { opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.9, delay: 0.7, ease: EASE }}
+            className="mt-7 max-w-xl text-lg leading-relaxed text-lite/85 drop-shadow-[0_1px_20px_rgba(7,11,20,0.9)] xl:text-xl"
+          >
+            A four-level certification ladder, from your first prompt to deployed
+            AI agents and foundation-model operations. Hands-on labs, industry
+            projects, internships, and placement support.
+          </motion.p>
+        </div>
+      </motion.div>
+
+    </section>
   );
 }
