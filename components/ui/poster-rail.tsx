@@ -19,7 +19,8 @@ export function PosterRail({ cards, header, cardWidth = 240, cardHeight = 320, g
   const { scrollYProgress } = useScroll({ target: sectionRef, offset: ["start start", "end end"] });
   useMotionValueEvent(scrollYProgress, "change", (p) => {
     const track = trackRef.current; if (!track) return;
-    const dist = Math.max(0, track.scrollWidth - window.innerWidth);
+    // First card centre → last card centre (scrollWidth omits the trailing padding, so it under-travels).
+    const dist = (cards.length - 1) * (cardWidth + gap);
     track.style.transform = `translateX(${-easeInOut(p) * dist}px)`;
     const mid = window.innerWidth / 2;
     cardRefs.current.forEach((el) => {

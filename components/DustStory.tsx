@@ -157,7 +157,7 @@ export default function DustStory({ className, particleCount = 3000, pinLength =
         </div>
 
         {/* Headline wipe */}
-        <div ref={headRef} className="pointer-events-none absolute inset-x-0 top-[7vh] flex justify-center px-6 text-center" style={{ clipPath: "inset(0 100% -10% 0)" }}>
+        <div ref={headRef} className="pointer-events-none absolute inset-x-0 top-[max(7vh,7rem)] flex justify-center px-6 text-center" style={{ clipPath: "inset(0 100% -10% 0)" }}>
           <h2 className="font-display max-w-5xl text-[clamp(2.2rem,5vw,4.5rem)] font-bold leading-[1.02] tracking-[-0.03em] text-white">
             One key. <span className="text-sky">Every frontier model.</span>
           </h2>
