@@ -66,9 +66,10 @@ function makePoints(count: number): Pt[] {
   return pts;
 }
 
-const orbitPos = (i: number, w: number, h: number) => {
+// Model node positions around (w/2, cy); ry fits the orbit between the headline and the outro.
+const orbitPos = (i: number, w: number, cy: number, ry: number) => {
   const a = -Math.PI / 2 + (i * Math.PI * 2) / 6;
-  return { x: w / 2 + Math.min(w * 0.3, 420) * Math.cos(a), y: h / 2 + Math.min(h * 0.2, 240) * Math.sin(a) };
+  return { x: w / 2 + Math.min(w * 0.3, 420) * Math.cos(a), y: cy + ry * Math.sin(a) };
 };
 
 // Edges-in: the hero dissolves from the screen edges toward the centre.
@@ -158,6 +159,14 @@ export default function Hero() {
     poster.src = "/video/futurex-poster.jpg";
     let P = makePoints(MEMBERS), cur = 0, lastH = -1, needSample = false, textReady = false, visible = true, frame = 0;
 
+    // The story is centred in the band between the headline and the outro, so nothing overlaps at any screen size.
+    let bandMid = 0, bandHalf = 0;
+    const layout = () => {
+      const head = headRef.current!, out = outroRef.current!;
+      const top = head.offsetTop + head.offsetHeight + 24, bottom = out.offsetTop - 24;
+      bandMid = (top + bottom) / 2; bandHalf = Math.max(80, (bottom - top) / 2);
+    };
+
     // Sample the hero into particle origins: film cells composited under the scrims, plus every glyph of the copy.
     const resample = () => {
       const w = sticky.clientWidth, h = sticky.clientHeight, sr = sticky.getBoundingClientRect();
@@ -231,10 +240,13 @@ export default function Hero() {
       const e2 = smooth((p - 0.5) / 0.3);  // atom → 6 model nodes branch out
       const spin = reduce ? 0 : t * 0.15;
       const tilt = 0.35, cosT = Math.cos(tilt), sinT = Math.sin(tilt), cosA = Math.cos(spin), sinA = Math.sin(spin);
-      const R = Math.min(w, H) * (0.3 + 0.06 * smooth(p / 0.15));
+      const R = Math.min(Math.min(w, H) * (0.3 + 0.06 * smooth(p / 0.15)), bandHalf ? bandHalf * 0.92 : Infinity);
       const Rh = Math.min(w, H) * 0.13, CR = Math.min(w, H) * 0.085;
-      const cx = w / 2, cy = H / 2, cspin = t * 0.5;
-      const clusters = MODELS.map((_, i) => orbitPos(i, w, H));
+      const cx = w / 2, cy = bandMid || H / 2, cspin = t * 0.5;
+      // Short screens: shrink hub + cards, and pick an orbit that clears the hub and stays inside the band.
+      const half = bandHalf || H / 2, fit = Math.max(0.65, Math.min(1, half / 240)), nodeHalf = 40 * fit;
+      const ry = Math.max(84 * fit + nodeHalf + 8, Math.min(240, half - nodeHalf));
+      const clusters = MODELS.map((_, i) => orbitPos(i, w, cy, ry));
       const fade = 1 - smooth((p - 0.9) / 0.1) * 0.35;
       const landing = h < 1, ghostIn = smooth((h - 0.55) / 0.45);
 
@@ -306,9 +318,9 @@ export default function Hero() {
       const hubOp = smooth((p - 0.3) / 0.15), nodeOp = smooth((p - 0.52) / 0.12);
       nodeRefs.current.forEach((el, i) => {
         if (!el) return;
-        const b = orbitPos(i, w, H);
+        const b = orbitPos(i, w, cy, ry);
         const x = cx + (b.x - cx) * e2, y = cy + (b.y - cy) * e2 + (reduce ? 0 : Math.sin(t * 1.1 + i * 1.3) * 4 * e2);
-        el.style.transform = `translate(${x - w / 2}px, ${y - H / 2}px) translate(-50%,-50%) scale(${0.5 + 0.32 * e2})`;
+        el.style.transform = `translate(${x - w / 2}px, ${y - H / 2}px) translate(-50%,-50%) scale(${(0.5 + 0.32 * e2) * fit})`;
         el.style.opacity = String(nodeOp);
         el.style.borderColor = e2 > 0.95 ? "rgba(52,198,247,.35)" : "rgba(255,255,255,.1)";
         const ln = lineRefs.current[i];
@@ -316,7 +328,7 @@ export default function Hero() {
       });
       linesRef.current!.style.opacity = String(nodeOp);
       hubRef.current!.style.opacity = String(hubOp);
-      hubRef.current!.style.transform = `translate(-50%,-50%) scale(${0.8 + 0.2 * hubOp}) translateY(${reduce ? 0 : Math.sin(t * 0.8) * 4}px)`;
+      hubRef.current!.style.transform = `translate(-50%,-50%) translateY(${cy - H / 2 + (reduce ? 0 : Math.sin(t * 0.8) * 4)}px) scale(${(0.8 + 0.2 * hubOp) * fit})`;
       const pk = (t * 0.9) % 1;
       pulseRef.current!.style.opacity = String(hubOp * (1 - pk) * 0.8);
       pulseRef.current!.style.transform = `scale(${1 + pk * 0.6})`;
@@ -333,14 +345,15 @@ export default function Hero() {
     // Sample once fonts are in and the entrance animation has settled (rects must be untransformed).
     let cancelled = false;
     Promise.all([document.fonts.ready, new Promise((r) => setTimeout(r, reduce ? 0 : ENTRANCE_MS))]).then(() => {
-      if (!cancelled) { textReady = true; needSample = true; }
+      if (!cancelled) { textReady = true; needSample = true; layout(); }
     });
     const onFrame = () => { needSample = true; };
     video.addEventListener("loadeddata", onFrame);
     poster.onload = onFrame;
     if (reduce) video.pause(); else video.play().catch(() => {});
     let rsT = 0;
-    const ro = new ResizeObserver(() => { clearTimeout(rsT); rsT = window.setTimeout(onFrame, 150); });
+    layout();
+    const ro = new ResizeObserver(() => { layout(); clearTimeout(rsT); rsT = window.setTimeout(onFrame, 150); });
     ro.observe(sticky);
     const io = new IntersectionObserver(([e]) => (visible = e.isIntersecting), { rootMargin: "100%" });
     io.observe(sticky);
@@ -439,8 +452,8 @@ export default function Hero() {
         </div>
 
         {/* Headline wipe */}
-        <div ref={headRef} className="pointer-events-none absolute inset-x-0 top-[max(11vh,6.5rem)] flex justify-center px-6 text-center" style={{ clipPath: "inset(0 100% -10% 0)" }}>
-          <h2 className="font-display max-w-5xl text-[clamp(2.2rem,5vw,4.5rem)] font-bold leading-[1.02] tracking-[-0.03em] text-white">
+        <div ref={headRef} className="pointer-events-none absolute inset-x-0 top-[max(15vh,8.5rem)] flex justify-center px-6 text-center" style={{ clipPath: "inset(0 100% -10% 0)" }}>
+          <h2 className="font-display max-w-5xl text-[clamp(2rem,4.4vw,4rem)] font-bold leading-[1.02] tracking-[-0.03em] text-white">
             One key. <span className="text-sky">Every frontier model.</span>
           </h2>
         </div>
