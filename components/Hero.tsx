@@ -9,6 +9,7 @@ import {
   useMotionTemplate,
 } from "framer-motion";
 import { useEffect, useRef } from "react";
+import { Marquee } from "@/components/ui/marquee";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
@@ -21,6 +22,13 @@ const LINE = [
   { t: "intelligence", accent: true },
   { t: "starts" },
   { t: "here." },
+];
+
+// What the four levels cover, for the ribbon along the bottom of the hero.
+const TOPICS = [
+  "Generative AI", "Prompt Engineering", "LLMs", "Speech & Vision AI", "Machine Learning", "Deep Learning",
+  "Embeddings", "Vector Databases", "RAG Systems", "AI Agents", "LangGraph", "CrewAI", "MCP",
+  "Tool Calling", "Fine-tuning", "Foundation Models", "FMOps", "AWS GenAI",
 ];
 
 export default function Hero() {
@@ -59,7 +67,7 @@ export default function Hero() {
     <section
       ref={sectionRef}
       onMouseMove={onMove}
-      className="dark-zone relative flex min-h-[100svh] items-center overflow-hidden bg-ink"
+      className="dark-zone relative flex min-h-[100svh] items-center overflow-hidden bg-ink pb-24"
     >
       {/* Full-bleed brand film, parallaxed */}
       <motion.div
@@ -129,6 +137,22 @@ export default function Hero() {
         </div>
       </motion.div>
 
+      {/* Endless topic ribbon */}
+      <motion.div
+        initial={reduce ? false : { opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 1, delay: 1.1, ease: EASE }}
+        className="absolute inset-x-0 bottom-0 border-y border-white/[0.07] bg-ink/40 py-4 backdrop-blur-sm"
+      >
+        <Marquee duration="60s" gap="2.5rem" className="[mask-image:linear-gradient(to_right,transparent,black_12%,black_88%,transparent)]" fade={false}>
+          {TOPICS.map((t) => (
+            <span key={t} className="flex items-center gap-[2.5rem] whitespace-nowrap font-mono text-[0.78rem] tracking-[0.18em] text-lite/70 uppercase">
+              {t}
+              <span aria-hidden className="size-1.5 rotate-45 bg-accent/70" />
+            </span>
+          ))}
+        </Marquee>
+      </motion.div>
     </section>
   );
 }

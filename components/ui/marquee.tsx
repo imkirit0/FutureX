@@ -33,11 +33,12 @@ export function Marquee({
           key={n}
           aria-hidden={n === 1}
           className={cn(
-            "flex shrink-0 items-center justify-around animate-marquee",
+            "flex shrink-0 items-center justify-around animate-marquee motion-reduce:animate-none",
             reverse && "[animation-direction:reverse]",
             pauseOnHover && "group-hover/marquee:[animation-play-state:paused]"
           )}
-          style={{ gap }}
+          // Set here: --animate-marquee resolves --duration at :root, so the prop alone has no effect.
+          style={{ gap, animationDuration: duration }}
         >
           {children}
         </div>
