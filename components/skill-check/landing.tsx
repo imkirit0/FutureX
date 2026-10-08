@@ -1,9 +1,6 @@
-"use client";
-
-import { useEffect, useRef } from "react";
 import Image from "next/image";
 import {
-  ArrowRight, Check, Clock, GraduationCap, Layers, ListChecks, Gift, Sparkles, Target, TrendingUp, Plus, X,
+  ArrowRight, Check, Clock, GraduationCap, Layers, ListChecks, Gift, Sparkles, Target, TrendingUp, Plus,
 } from "lucide-react";
 import { BEGINNER_STAGES, LEVELS, STAGES } from "@/lib/engine";
 
@@ -14,7 +11,6 @@ const wrap = "mx-auto w-full max-w-6xl px-4 sm:px-6";
 export default function Landing({ onNew, onPick }: { onNew: () => void; onPick: () => void }) {
   return (
     <div>
-      <StartPopup onNew={onNew} onPick={onPick} />
       {/* ---------- Hero ---------- */}
       <section className="relative overflow-hidden">
         <div aria-hidden className="pointer-events-none absolute inset-0">
@@ -189,31 +185,6 @@ export default function Landing({ onNew, onPick }: { onNew: () => void; onPick: 
         </div>
       </section>
     </div>
-  );
-}
-
-// Nudge to start the quiz after 6s on the landing page.
-function StartPopup({ onNew, onPick }: { onNew: () => void; onPick: () => void }) {
-  const ref = useRef<HTMLDialogElement>(null);
-  useEffect(() => {
-    const id = setTimeout(() => ref.current?.showModal(), 6000);
-    return () => clearTimeout(id);
-  }, []);
-  const close = () => ref.current?.close();
-  return (
-    <dialog ref={ref} aria-labelledby="start-popup-title" onClick={e => e.target === e.currentTarget && close()}
-      className="sc-rise m-auto w-[calc(100%-2rem)] max-w-md overflow-hidden rounded-2xl border border-line bg-white p-0 shadow-[0_30px_80px_-30px_rgb(16_24_40/.5)] backdrop:bg-[#0b1427]/40 backdrop:backdrop-blur-sm">
-      <div className="relative p-7">
-        <button onClick={close} aria-label="Close" className="absolute top-4 right-4 grid size-8 cursor-pointer place-items-center rounded-lg text-muted hover:bg-surface-2"><X className="size-4" /></button>
-        <span className="grid size-11 place-items-center rounded-xl bg-indigo/10 text-indigo"><Sparkles className="size-5" /></span>
-        <h2 id="start-popup-title" className="mt-4 text-xl">Not sure where to start?</h2>
-        <p className="mt-2 text-[15px] leading-relaxed text-muted">Take the free 5-minute AI skill check and we&apos;ll match you to the right FutureX course.</p>
-      </div>
-      <div className="flex flex-col gap-3 border-t border-line bg-surface-2/60 p-4 sm:flex-row">
-        <button onClick={() => { close(); onNew(); }} className={`${btn} flex-1 !px-4 !py-2.5 text-sm`}>I&apos;m new to AI</button>
-        <button onClick={() => { close(); onPick(); }} className={`${ghost} flex-1 !px-4 !py-2.5 text-sm`}>I&apos;ve picked a level</button>
-      </div>
-    </dialog>
   );
 }
 

@@ -4,6 +4,7 @@ import "./globals.css";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
 import SmoothScroll from "@/components/SmoothScroll";
+import SkillCheckPopup from "@/components/SkillCheckPopup";
 import { StarsBackground } from "@/components/ui/stars";
 
 const bricolage = Bricolage_Grotesque({ subsets: ["latin"], variable: "--font-bricolage" });
@@ -34,6 +35,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <Nav />
           <main id="main">{children}</main>
           <Footer />
+          <SkillCheckPopup />
         </SmoothScroll>
       </body>
     </html>
