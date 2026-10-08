@@ -8,7 +8,7 @@ import {
   type Session,
 } from "@/lib/engine";
 
-// Stages 1-2 are the course basics; stages 3-4 are graduate level.
+// Stages 1-2 use gentler tags; stages 3-4 are the serious end.
 const WARM_UP = { 1: "Easy", 2: "Medium", 3: "Hard" } as const;
 const DIFFICULTY = {
   1: { label: "Hard", cls: "bg-amber-50 text-amber-700 ring-amber-600/20", dot: "bg-amber-500" },

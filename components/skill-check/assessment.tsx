@@ -62,7 +62,7 @@ export default function Assessment() {
 
 function Briefing({ s, onBack, onStart }: { s: Session; onBack: () => void; onStart: () => void }) {
   const rules = [
-    ["It starts with the basics, then gets serious", "Stage 1 is AI basics and Stage 2 is GenAI & tools. Stages 3 and 4 are graduate-level ML and systems."],
+    ["It starts with the basics, then gets serious", "Stage 1 is AI basics, Stages 2 and 3 are engineering-level GenAI and ML, and Stage 4 is graduate-level agents and systems."],
     ["Clear a stage to go up", "Move freely between a stage's questions, then submit. Do well and the next stage unlocks."],
     [`You have ${TIME_LIMIT_SECONDS / 60} minutes`, "Most people finish in about five. Please keep this tab open while you work."],
   ];

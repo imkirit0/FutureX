@@ -83,7 +83,7 @@ export default function Home() {
                   eyebrow="Free · about 5 minutes"
                   icon={<Target />}
                   title="Test your skills."
-                  description="A quiz that opens with AI basics and climbs to graduate-level ML. It stops when it finds your ceiling, then tells you which FutureX level to start with."
+                  description="A quiz that opens with AI basics and climbs to graduate-level agents and systems. It stops when it finds your ceiling, then tells you which FutureX level to start with."
                 />
                 <ButtonLink href="/skill-check" size="lg" arrow="right" className="mt-8">
                   Take the skill check

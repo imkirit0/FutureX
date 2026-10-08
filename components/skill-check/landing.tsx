@@ -33,7 +33,7 @@ export default function Landing({ onNew, onPick }: { onNew: () => void; onPick: 
             </h1>
             <p className="sc-blur-in mt-6 max-w-xl text-lg leading-relaxed text-muted [animation-delay:160ms]">
               A progressive quiz from FutureX AI Lab. It opens with AI basics and GenAI, climbs to
-              graduate-level ML and systems, and matches you to the FutureX course that fits.
+              graduate-level agents and systems, and matches you to the FutureX course that fits.
             </p>
             <div className="sc-blur-in mt-9 flex flex-wrap gap-3 [animation-delay:240ms]">
               <button className={btn} onClick={onNew}>
@@ -149,7 +149,7 @@ export default function Landing({ onNew, onPick }: { onNew: () => void; onPick: 
         <div className="grid gap-3">
           {[
             ["Is it really free?", "Yes. The quiz and your results are free, and so is the follow-up call with an advisor if you want one."],
-            ["How hard is it?", "It climbs. Stage 1 is AI basics and Stage 2 is GenAI & tools; Stages 3 and 4 are graduate level. There is no pass or fail: stopping early simply shows which level to start at."],
+            ["How hard is it?", "It climbs steadily. Stage 1 is AI basics, Stages 2 and 3 are engineering-level GenAI and ML, and Stage 4 is graduate level. There is no pass or fail: stopping early simply shows which level to start at."],
             ["What happens to my details?", "We ask for your name, email and phone at the end so we can send your results and, with your permission, have an advisor contact you about courses."],
             ["Can I take it again?", "Yes. You'll get a different mix of questions each time."],
           ].map(([q, a]) => (
