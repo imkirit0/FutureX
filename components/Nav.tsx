@@ -59,9 +59,9 @@ export default function Nav() {
         >
           <Link href="/" className="flex shrink-0 items-center" aria-label="FutureX AI Lab home">
             <Image
-              src="/img/logo-white.png"
+              src="/img/logo-wordmark-white.png"
               alt="FutureX, G-TEC AI Lab"
-              width={170}
+              width={133}
               height={38}
               priority
               className="h-8 w-auto sm:h-9"

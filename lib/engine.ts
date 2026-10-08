@@ -9,14 +9,14 @@ export type Question = { b: number; d: 1 | 2 | 3; t: string; q: string; o: strin
 export const STAGES = ['AI Basics', 'Level 1 · GenAI & Tools', 'Level 2 · ML & RAG', 'Level 3 · Agents & LLM systems'];
 
 export const LEVELS: Record<number, { name: string; blurb: string; url: string }> = {
-  1: { name: 'Certificate in Generative AI & Applied AI Tools', url: '/courses/certificate-generative-ai-applied-ai-tools',
+  1: { name: 'AI Foundations & Prompt Engineering', url: '/courses/certificate-generative-ai-applied-ai-tools',
        blurb: '120 hours · AI & digital fluency, prompt engineering with LLM and vision models, audio & speech AI, ethical AI, AI tools, chatbot capstone.' },
   2: { name: 'Advanced Certificate in Generative AI Pipelines & RAG Systems', url: '/courses/advanced-certificate-generative-ai-pipelines-rag',
        blurb: '120 hours · Machine learning, deep learning, advanced prompting, vector embeddings, semantic search and building RAG systems.' },
-  3: { name: 'Professional Certificate in AI Agents, Automation & Deployment', url: '/courses/professional-certificate-ai-agents-automation-deployment',
+  3: { name: 'Enterprise AI Solutions Engineering', url: '/courses/professional-certificate-ai-agents-automation-deployment',
        blurb: 'AI agents, LangGraph & CrewAI, browser agents, MCP, tool and function calling, deployment capstone.' },
 };
-export const LEVEL4 = { name: 'Professional Certificate in Generative AI, Foundation Models & FMOps', url: '/courses/professional-certificate-foundation-models-fmops' };
+export const LEVEL4 = { name: 'Professional Certificate in AI Agents and FMOps', url: '/courses/professional-certificate-foundation-models-fmops' };
 
 export const QUESTIONS: Question[] = [
   // ===== One bank for every path, ramping up: course basics, engineering-level stages 1-2, graduate-level stage 3 =====

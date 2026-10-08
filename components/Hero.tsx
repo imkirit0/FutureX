@@ -476,7 +476,7 @@ export default function Hero() {
         <div ref={hubRef} className="absolute left-1/2 top-1/2 flex h-[168px] w-[168px] flex-col items-center justify-center gap-2 rounded-3xl border border-accent/40 bg-ink-2 text-center opacity-0 shadow-card-lg will-change-transform">
           <span ref={pulseRef} aria-hidden className="pointer-events-none absolute inset-0 rounded-3xl border border-accent opacity-0" />
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/img/logo-white.png" alt="FutureX" className="h-[26px] w-auto" />
+          <img src="/img/logo-wordmark-white.png" alt="FutureX" className="h-[26px] w-auto" />
           <span className="font-display text-base font-bold leading-tight text-white">Master API</span>
           <span className="font-mono text-[0.6rem] tracking-[0.16em] text-accent">ONE ENDPOINT</span>
         </div>

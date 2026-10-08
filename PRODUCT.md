@@ -24,10 +24,10 @@ Career-focused, practical AI education with a clear 4-level certification ladder
 ## Capabilities and Constraints
 
 - Courses (real, must not be renamed):
-  - L1: Certificate in Generative AI & Applied AI Tools
+  - L1: AI Foundations & Prompt Engineering
   - L2: Advanced Certificate in Generative AI Pipelines & RAG Systems
-  - L3: Professional Certificate in AI Agents, Automation & Deployment
-  - L4: Professional Certificate in Generative AI, Foundation Models & FMOps
+  - L3: Enterprise AI Solutions Engineering
+  - L4: Professional Certificate in AI Agents and FMOps
   - L4: Certification Program in AWS Generative AI & AI Practitioner Readiness
 - Pricing, durations, batch dates: NOT published — do not invent. Use "Enquire" CTAs.
 - No physical address/phone published on current site; contact = form + socials.

@@ -20,9 +20,9 @@ export default function Footer() {
         <div className="grid gap-12 md:grid-cols-12">
           <div className="md:col-span-5">
             <Image
-              src="/img/logo-white.png"
+              src="/img/logo-wordmark-white.png"
               alt="FutureX, G-TEC AI Lab"
-              width={180}
+              width={140}
               height={40}
               className="h-9 w-auto"
             />
