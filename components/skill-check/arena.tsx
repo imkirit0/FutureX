@@ -3,20 +3,19 @@
 import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, ArrowRight, Check, Flag, Keyboard, Lock, Send, Sparkles } from "lucide-react";
 import {
-  TIME_LIMIT_SECONDS, stagesFor,
+  STAGES, TIME_LIMIT_SECONDS,
   choose, finish, isQuick, passMark, submitStage,
   type Session,
 } from "@/lib/engine";
 
 const DIFFICULTY = {
-  1: { label: "Easy", cls: "bg-green-50 text-green-700 ring-green-600/20", dot: "bg-green-500" },
-  2: { label: "Medium", cls: "bg-amber-50 text-amber-700 ring-amber-600/20", dot: "bg-amber-500" },
-  3: { label: "Hard", cls: "bg-red-50 text-red-700 ring-red-600/20", dot: "bg-red-500" },
+  1: { label: "Hard", cls: "bg-amber-50 text-amber-700 ring-amber-600/20", dot: "bg-amber-500" },
+  2: { label: "Very hard", cls: "bg-red-50 text-red-700 ring-red-600/20", dot: "bg-red-500" },
+  3: { label: "Expert", cls: "bg-violet-50 text-violet-700 ring-violet-600/20", dot: "bg-violet-500" },
 } as const;
 
 export default function Arena({ initial, onFinish }: { initial: Session; onFinish: (s: Session, tabSwitches: number) => void }) {
   const [s, setS] = useState(initial);
-  const STAGES = stagesFor(initial.chosenLevel);
   const [view, setView] = useState(0); // stage being looked at (open stage or a cleared one)
   const [pos, setPos] = useState(0);
   const [dir, setDir] = useState(1); // slide direction for the question card
@@ -95,7 +94,7 @@ export default function Arena({ initial, onFinish }: { initial: Session; onFinis
     if (next.done) return end(next);
     setS(next);
     go(next.stage);
-    setBanner(`Nice work. Stage ${next.stage + 1}, ${STAGES[next.stage]}, is now open. The questions get a bit harder from here.`);
+    setBanner(`Nice work. Stage ${next.stage + 1}, ${STAGES[next.stage]}, is now open. The questions get harder from here.`);
   }
 
   const answered = picks.filter(p => p !== null).length;

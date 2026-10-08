@@ -2,7 +2,7 @@ import Image from "next/image";
 import {
   ArrowRight, Check, Clock, GraduationCap, Layers, ListChecks, Gift, Sparkles, Target, TrendingUp, Plus,
 } from "lucide-react";
-import { BEGINNER_STAGES, LEVELS, STAGES } from "@/lib/engine";
+import { LEVELS, STAGES } from "@/lib/engine";
 
 const btn = "group inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-brand px-6 py-3 text-[15px] font-medium shadow-[0_10px_30px_-12px_rgb(58_99_224/.7)] transition-all hover:-translate-y-0.5";
 const ghost = "inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-line bg-ink/80 px-6 py-3 text-[15px] font-medium backdrop-blur transition-all hover:-translate-y-0.5 hover:border-indigo/40 hover:text-indigo";
@@ -26,23 +26,23 @@ export default function Landing({ onNew, onPick }: { onNew: () => void; onPick: 
                 <span className="absolute inline-flex size-full animate-ping rounded-full bg-cyan opacity-60" />
                 <span className="relative inline-flex size-2 rounded-full bg-cyan" />
               </span>
-              Free AI skill check · about 5 minutes
+              Free AI skill check · hard mode
             </div>
             <h1 className="sc-blur-in mt-6 text-[clamp(38px,5.6vw,68px)] leading-[1.02] [animation-delay:80ms]">
               Find your level in AI. <span className="sc-text-gradient">Start where you belong.</span>
             </h1>
             <p className="sc-blur-in mt-6 max-w-xl text-lg leading-relaxed text-muted [animation-delay:160ms]">
-              A short, progressive quiz from FutureX AI Lab. It starts with everyday questions, gets harder as you go, and
-              matches you to the FutureX course that fits.
+              A brutal, progressive quiz from FutureX AI Lab. It opens with brain-cracking maths and LLM internals, climbs
+              to graduate-level ML and systems, and matches you to the FutureX course that fits.
             </p>
             <div className="sc-blur-in mt-9 flex flex-wrap gap-3 [animation-delay:240ms]">
               <button className={btn} onClick={onNew}>
-                I&apos;m new to AI <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+                Find my level <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
               </button>
               <button className={ghost} onClick={onPick}>I&apos;ve picked a FutureX level</button>
             </div>
             <dl className="sc-blur-in mt-12 flex flex-wrap gap-x-8 gap-y-4 [animation-delay:320ms]">
-              {[[Clock, "5 min", "average time"], [Layers, "4 levels", "easy to advanced"], [Gift, "Free", "results + advice"]].map(([Icon, v, l]) => {
+              {[[Clock, "20 min", "time limit"], [Layers, "4 stages", "hard to expert"], [Gift, "Free", "results + advice"]].map(([Icon, v, l]) => {
                 const I = Icon as typeof Clock;
                 return (
                   <div key={l as string} className="flex items-center gap-3">
@@ -61,21 +61,21 @@ export default function Landing({ onNew, onPick }: { onNew: () => void; onPick: 
 
       {/* ---------- Two paths ---------- */}
       <section className={`${wrap} py-24 md:py-28`}>
-        <SectionHead kicker="Two ways to start" title="Pick the one that sounds like you" sub="Each path has its own questions and its own four levels." />
+        <SectionHead kicker="Two ways to start" title="Pick the one that sounds like you" sub="Both use the same hard questions. One finds your level; the other checks the level you picked." />
         <div className="mt-14 grid gap-6 md:grid-cols-2">
           <PathCard
             icon={Sparkles}
-            title="I'm new to AI"
-            body="Everyday questions about the apps you already use: Netflix, Maps, ChatGPT. No technical knowledge needed."
-            levels={BEGINNER_STAGES}
-            cta="Start the beginner quiz"
+            title="Find my level"
+            body="Not sure where you stand? Start at Stage 1 and climb as far as you can. The stage where you stop sets your recommended course."
+            levels={STAGES}
+            cta="Start the climb"
             onClick={onNew}
             featured
           />
           <PathCard
             icon={GraduationCap}
             title="I've picked a FutureX level"
-            body="Already chosen Level 1, 2 or 3? Engineering-level questions, pitched at NIT / B.Tech students, test the maths, ML and LLM depth that level expects."
+            body="Already chosen Level 1, 2 or 3? The same hard questions check whether you have the maths, ML and LLM depth that level expects."
             levels={STAGES}
             cta="Check my level"
             onClick={onPick}
@@ -149,7 +149,7 @@ export default function Landing({ onNew, onPick }: { onNew: () => void; onPick: 
         <div className="grid gap-3">
           {[
             ["Is it really free?", "Yes. The quiz and your results are free, and so is the follow-up call with an advisor if you want one."],
-            ["I've never studied AI. Will I fail?", "There's no pass or fail. The beginner quiz starts with questions about apps you already use, and stopping early simply means Level 1 is the right place to begin."],
+            ["How hard is it?", "Very. Stages 1 and 2 are brain-cracking maths, Python and LLM internals; Stages 3 and 4 are graduate level. There is no pass or fail: stopping early simply shows which level to start at."],
             ["What happens to my details?", "We ask for your name, email and phone at the end so we can send your results and, with your permission, have an advisor contact you about courses."],
             ["Can I take it again?", "Yes. You'll get a different mix of questions each time."],
           ].map(([q, a]) => (
@@ -177,7 +177,7 @@ export default function Landing({ onNew, onPick }: { onNew: () => void; onPick: 
             <h2 className="mx-auto mt-4 max-w-2xl text-[clamp(30px,4vw,46px)] leading-tight">Five minutes now saves weeks in the wrong course.</h2>
             <div className="mt-10 flex flex-wrap justify-center gap-3">
               <button onClick={onNew} className="group inline-flex cursor-pointer items-center gap-2 rounded-xl bg-white px-6 py-3 text-[15px] font-medium text-[#070b14] transition-all hover:-translate-y-0.5">
-                I&apos;m new to AI <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+                Find my level <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
               </button>
               <button onClick={onPick} className="cursor-pointer rounded-xl border border-white/25 px-6 py-3 text-[15px] font-medium transition-all hover:-translate-y-0.5 hover:border-white/60">I&apos;ve picked a FutureX level</button>
             </div>
@@ -242,21 +242,21 @@ function Bento({ icon: Icon, step, title, body, children }: { icon: typeof Targe
 
 // Example of the real quiz screen with floating status chips.
 function HeroVisual() {
-  const options = ["The sender asked it to", "Your inbox was full", "AI learned what spam emails usually look like", "Pure chance"];
+  const options = ["1/2", "3/4", "2/3", "1/3"];
   return (
     <div className="sc-blur-in relative mx-auto w-full max-w-md [animation-delay:200ms]">
       <div aria-hidden className="absolute -inset-6 rounded-[2rem] bg-gradient-to-br from-indigo/20 via-cyan/10 to-transparent blur-2xl" />
       <figure className="sc-float sc-border-gradient relative rounded-2xl p-6 shadow-[0_40px_80px_-40px_rgb(11_16_32/.45)]" aria-label="Example question from the quiz">
         <div className="flex items-center gap-1.5" aria-hidden>
-          {BEGINNER_STAGES.map((s, i) => (
+          {STAGES.map((s, i) => (
             <span key={s} className={`h-1.5 flex-1 rounded-full ${i === 0 ? "bg-gradient-to-r from-indigo to-cyan" : "bg-surface-2"}`} />
           ))}
         </div>
         <div className="mt-4 flex items-center justify-between text-xs text-muted">
-          <span>Stage 1 · Curious</span>
-          <span>Question 3 of 4 · <span className="font-medium text-amber-700">Medium</span></span>
+          <span>Stage 1 · Foundations</span>
+          <span>Question 2 of 4 · <span className="font-medium text-red-700">Very hard</span></span>
         </div>
-        <p className="mt-3 font-display text-lg leading-snug font-semibold">Your inbox moves &ldquo;You WON a free iPhone!!!&rdquo; straight to spam. Why?</p>
+        <p className="mt-3 font-display text-lg leading-snug font-semibold">X and Y are independent Uniform(0, 1). What is E[max(X, Y)]?</p>
         <ul className="mt-4 grid gap-2" aria-hidden>
           {options.map((o, i) => (
             <li key={o} className={`flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm ${i === 2 ? "bg-indigo/10 ring-2 ring-indigo" : "ring-1 ring-line"}`}>
@@ -265,7 +265,7 @@ function HeroVisual() {
             </li>
           ))}
         </ul>
-        <figcaption className="mt-4 border-t border-line pt-3 text-xs text-muted">Example question from the beginner quiz</figcaption>
+        <figcaption className="mt-4 border-t border-line pt-3 text-xs text-muted">Example question from Stage 1</figcaption>
       </figure>
 
       <div aria-hidden className="sc-float-slow sc-glass absolute -top-5 -left-6 hidden items-center gap-2.5 rounded-xl border border-line px-3.5 py-2.5 sm:flex">

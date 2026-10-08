@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import {
   LEVEL4, LEVELS, STATUSES, TIME_LIMIT_SECONDS,
-  answersOf, createSession, stagesFor, submissionOf,
+  STAGES, answersOf, createSession, submissionOf,
   type Report, type Session,
 } from "@/lib/engine";
 import { DustSphere } from "@/components/ui/dust-sphere";
@@ -62,14 +62,14 @@ export default function Assessment() {
 
 function Briefing({ s, onBack, onStart }: { s: Session; onBack: () => void; onStart: () => void }) {
   const rules = [
-    ["It starts easy", "Questions get harder as you go. Answer what you can, and it's fine to guess."],
+    ["It starts hard and gets harder", "Expect university-level maths and LLM internals, then graduate-level ML and systems. Answer what you can."],
     ["Clear a stage to go up", "Move freely between a stage's questions, then submit. Do well and the next stage unlocks."],
     [`You have ${TIME_LIMIT_SECONDS / 60} minutes`, "Most people finish in about five. Please keep this tab open while you work."],
   ];
   return (
     <section className="sc-rise mx-auto max-w-2xl">
       <button onClick={onBack} className="text-muted hover:text-lite">← Back</button>
-      <div className={`${eyebrow} mt-6`}>{s.chosenLevel ? `Checking Level ${s.chosenLevel}` : "New to AI"}</div>
+      <div className={`${eyebrow} mt-6`}>{s.chosenLevel ? `Checking Level ${s.chosenLevel}` : "Find your level"}</div>
       <h1 className={h1}>How the quiz works</h1>
       <ol className="mt-6 grid gap-3">
         {rules.map(([t, d], i) => (
@@ -166,7 +166,7 @@ function LeadForm({ s, tabSwitches, onDone }: { s: Session; tabSwitches: number;
 function verdictCopy(r: Report) {
   const L = (n: number) => `Level ${n}`;
   if (!r.chosenLevel) {
-    if (r.top < 0) return { tone: "info", title: "A fresh start, and that's perfect.", body: "Level 1 is built for complete beginners from any stream: Engineering, Science, Arts or Commerce." };
+    if (r.top < 0) return { tone: "info", title: "A fresh start, and that's perfect.", body: "These questions are deliberately tough. Level 1 builds the maths and LLM foundations they test, from the ground up." };
     if (r.beyond) return { tone: "info", title: "You're already strong across agents and RAG.", body: `Level 3 will sharpen your deployment skills. Also take a look at the ${LEVEL4.name}.` };
     return { tone: "info", title: `We recommend ${L(r.recommended)}.`, body: `You cleared ${r.stages[r.top].name}, so ${L(r.recommended)} is your natural next step.` };
   }
@@ -260,7 +260,7 @@ function Review({ s }: { s: Session }) {
   const answers = answersOf(s);
   return (
     <div className="grid gap-6">
-      {stagesFor(s.chosenLevel).map((name, b) => {
+      {STAGES.map((name, b) => {
         const items = answers.filter(a => a.q.b === b);
         if (!items.length) return null;
         return (

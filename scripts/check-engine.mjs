@@ -1,7 +1,7 @@
 // Self-check for the skill-check engine: node scripts/check-engine.mjs
 // Plays random sessions on every track and checks the server replay agrees with the client.
 import assert from 'node:assert/strict';
-import { QUESTIONS, STAGES, createSession, choose, submitStage, finish, submissionOf, replay, report, inTrack, passMark } from '../lib/engine.ts';
+import { QUESTIONS, STAGES, createSession, choose, submitStage, finish, submissionOf, replay, report, passMark } from '../lib/engine.ts';
 
 // Question bank sanity.
 const seen = new Set();
@@ -18,8 +18,8 @@ for (const level of [null, 1, 2, 3]) {
     let s = createSession(level);
     for (const [b, qs] of s.paper.entries()) {
       assert.ok(qs.every(Boolean), `empty slot: level ${level} stage ${b}`);
-      assert.ok(qs.every(q => inTrack(q, level) && q.b === b), 'wrong track/stage');
-      assert.deepEqual(qs.map(q => q.d), [...qs.map(q => q.d)].sort(), 'not easy → hard');
+      assert.ok(qs.every(q => q.b === b), 'wrong stage');
+      assert.deepEqual(qs.map(q => q.d), [...qs.map(q => q.d)].sort(), 'not in difficulty order');
     }
     // Each answer is right with a per-run skill probability; some runs time out.
     const skill = Math.random(), timeout = Math.random() < 0.1;
@@ -43,10 +43,10 @@ for (const level of [null, 1, 2, 3]) {
   }
 }
 
-// A tampered submission (answers from the wrong track) is rejected.
+// A tampered submission (a question from the wrong stage) is rejected.
 const s = finish(createSession(2));
 const bad = submissionOf(s);
-bad[0].ids[0] = QUESTIONS.findIndex(q => q.k === 'new');
+bad[0].ids[0] = QUESTIONS.findIndex(q => q.b === 3);
 assert.equal(replay(2, bad), null);
 
 console.log(`ok: ${QUESTIONS.length} questions, 8000 sessions replayed`);

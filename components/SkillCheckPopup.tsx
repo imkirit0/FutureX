@@ -7,7 +7,7 @@ import { usePathname } from "next/navigation";
 import { ArrowRight, Clock, Gift, Layers, X } from "lucide-react";
 
 const KEY = "fx-skill-popup-seen";
-const PERKS = [[Clock, "5 min"], [Layers, "4 levels"], [Gift, "Free"]] as const;
+const PERKS = [[Clock, "20 min"], [Layers, "4 stages"], [Gift, "Free"]] as const;
 
 // Invites visitors to the skill check after 6s on the site; once per browser session.
 export default function SkillCheckPopup() {
@@ -60,7 +60,7 @@ export default function SkillCheckPopup() {
             Where do you stand <span className="text-gradient animate-gradient-x">in AI?</span>
           </h2>
           <p className="mt-3 text-[15px] leading-relaxed text-body-soft">
-            Answer a few quick questions and we&apos;ll match you to the FutureX course that fits you best.
+            Brain-cracking maths, LLM internals and graduate-level ML. Climb as far as you can and we&apos;ll match you to the right FutureX course.
           </p>
 
           {/* Level ladder */}
