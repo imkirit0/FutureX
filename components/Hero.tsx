@@ -68,7 +68,7 @@ function makePoints(count: number): Pt[] {
 
 const orbitPos = (i: number, w: number, h: number) => {
   const a = -Math.PI / 2 + (i * Math.PI * 2) / 6;
-  return { x: w / 2 + Math.min(w * 0.3, 420) * Math.cos(a), y: h / 2 + Math.min(h * 0.26, 260) * Math.sin(a) };
+  return { x: w / 2 + Math.min(w * 0.3, 420) * Math.cos(a), y: h / 2 + Math.min(h * 0.2, 240) * Math.sin(a) };
 };
 
 // Edges-in: the hero dissolves from the screen edges toward the centre.
@@ -325,7 +325,6 @@ export default function Hero() {
       introRef.current!.style.transform = `translateY(${(1 - oi) * 24}px)`;
       const hr = smooth((p - 0.3) / 0.22);
       headRef.current!.style.clipPath = `inset(0 ${(1 - hr) * 100}% -10% 0)`;
-      headRef.current!.style.transform = `translateY(${-e2 * 2}vh)`;
       const oo = smooth((p - 0.82) / 0.12);
       outroRef.current!.style.opacity = String(oo);
       outroRef.current!.style.transform = `translateY(${(1 - oo) * 24}px)`;
@@ -440,7 +439,7 @@ export default function Hero() {
         </div>
 
         {/* Headline wipe */}
-        <div ref={headRef} className="pointer-events-none absolute inset-x-0 top-[max(7vh,7rem)] flex justify-center px-6 text-center" style={{ clipPath: "inset(0 100% -10% 0)" }}>
+        <div ref={headRef} className="pointer-events-none absolute inset-x-0 top-[max(11vh,6.5rem)] flex justify-center px-6 text-center" style={{ clipPath: "inset(0 100% -10% 0)" }}>
           <h2 className="font-display max-w-5xl text-[clamp(2.2rem,5vw,4.5rem)] font-bold leading-[1.02] tracking-[-0.03em] text-white">
             One key. <span className="text-sky">Every frontier model.</span>
           </h2>
