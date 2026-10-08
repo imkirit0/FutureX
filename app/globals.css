@@ -335,3 +335,17 @@ html.lenis body {
 @media (prefers-reduced-motion: reduce) {
   .sc-rise, .sc-blur-in, .sc-float, .sc-float-slow, .sc-drift, .sc-slide-in, .sc-slide-in-back { animation: none; }
 }
+
+/* Skill check popup entrance */
+@keyframes fx-pop-in { from { opacity: 0; transform: translateY(24px) scale(.94); filter: blur(6px); } to { opacity: 1; transform: none; filter: blur(0); } }
+@keyframes fx-pop-zoom { from { transform: scale(1.15); } to { transform: scale(1); } }
+@keyframes fx-pop-grow { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+@keyframes fx-pop-fade { from { opacity: 0; } to { opacity: 1; } }
+.fx-pop[open] { animation: fx-pop-in .6s cubic-bezier(.16,1,.3,1) both; }
+.fx-pop[open]::backdrop { animation: fx-pop-fade .4s ease-out both; }
+.fx-pop[open] .fx-pop-img { animation: fx-pop-zoom 1.6s cubic-bezier(.16,1,.3,1) both; }
+.fx-pop-bar { transform-origin: bottom; }
+.fx-pop[open] .fx-pop-bar { animation: fx-pop-grow .7s cubic-bezier(.16,1,.3,1) both; }
+@media (prefers-reduced-motion: reduce) {
+  .fx-pop[open], .fx-pop[open] *, .fx-pop[open]::backdrop { animation: none !important; }
+}
