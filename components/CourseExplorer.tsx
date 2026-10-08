@@ -27,7 +27,7 @@ export default function CourseExplorer() {
         <div
           role="tablist"
           aria-label="Filter programs by level"
-          className="inline-flex flex-wrap gap-1 rounded-full border border-white/10 bg-white/[0.03] p-1"
+          className="no-scrollbar -mx-5 flex max-w-[100vw] gap-1 overflow-x-auto px-5 sm:mx-0 sm:inline-flex sm:max-w-full sm:flex-wrap sm:rounded-full sm:border sm:border-white/10 sm:bg-white/[0.03] sm:p-1"
         >
           {filters.map((f) => {
             const active = f.key === level;
@@ -39,7 +39,7 @@ export default function CourseExplorer() {
                 aria-selected={active}
                 onClick={() => setLevel(f.key)}
                 className={cn(
-                  "relative cursor-pointer rounded-full px-4 py-2 text-sm font-medium transition-colors",
+                  "relative shrink-0 cursor-pointer whitespace-nowrap rounded-full px-4 py-2.5 text-sm font-medium transition-colors sm:py-2",
                   active ? "text-ink" : "text-body-soft hover:text-white"
                 )}
               >

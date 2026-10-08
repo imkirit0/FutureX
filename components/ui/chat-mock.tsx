@@ -76,7 +76,7 @@ export function ChatMock({
             <p className="text-xs text-sky-dim">{subtitle}</p>
           </div>
         </div>
-        <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[0.7rem] font-medium text-body-soft">
+        <span className="shrink-0 whitespace-nowrap rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[0.7rem] font-medium text-body-soft">
           Grades 3–12
         </span>
       </div>

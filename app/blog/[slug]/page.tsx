@@ -37,7 +37,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
         <Glow className="-top-32 left-1/2 h-[24rem] w-[50rem] -translate-x-1/2" color="rgba(32,104,216,0.2)" />
         <Container size="narrow" className="relative">
           <FadeIn>
-            <Link href="/blog" className="inline-flex items-center gap-1.5 text-sm text-sky-dim transition-colors hover:text-white">
+            <Link href="/blog" className="-my-2 inline-flex items-center gap-1.5 py-2 text-sm text-sky-dim transition-colors hover:text-white">
               <ArrowLeft className="h-4 w-4" aria-hidden /> The lab notebook
             </Link>
           </FadeIn>

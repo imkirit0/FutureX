@@ -44,7 +44,7 @@ export default function IntroLoader() {
         preload="auto"
         onEnded={finish}
         onError={finish}
-        className="h-full w-full object-cover"
+        className="h-full w-full object-contain landscape:object-cover"
       />
     </div>
   );

@@ -96,7 +96,7 @@ function FooterCol({
   return (
     <div className={className}>
       <h3 className="text-xs font-semibold uppercase tracking-[0.14em] text-sky-dim">{title}</h3>
-      <ul className="mt-5 space-y-3">{children}</ul>
+      <ul className="mt-4 space-y-0.5 md:mt-5 md:space-y-3">{children}</ul>
     </div>
   );
 }
@@ -106,7 +106,7 @@ function FooterLink({ href, children }: { href: string; children: React.ReactNod
     <li>
       <Link
         href={href}
-        className="group inline-flex items-center gap-1 text-[0.95rem] text-body-soft transition-colors hover:text-white"
+        className="group inline-flex min-h-10 items-center gap-1 text-[0.95rem] md:min-h-0 text-body-soft transition-colors hover:text-white"
       >
         <span>{children}</span>
         <ArrowUpRight

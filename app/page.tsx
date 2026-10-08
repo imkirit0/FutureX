@@ -153,7 +153,7 @@ export default function Home() {
                     <h3 className="font-display mt-6 text-xl font-bold text-white md:text-2xl">{s.title}</h3>
                     <p className="mt-3 max-w-xl text-[0.98rem] leading-relaxed text-body-soft">{s.body}</p>
                     {i === 0 && (
-                      <div className="mt-8 grid grid-cols-4 gap-2">
+                      <div className="mt-8 grid grid-cols-2 gap-2 sm:grid-cols-4">
                         {[1, 2, 3, 4].map((l) => (
                           <div key={l} className="rounded-xl border border-white/8 bg-ink/50 p-3">
                             <div className="flex items-end gap-1" aria-hidden>

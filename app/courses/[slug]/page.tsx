@@ -44,7 +44,7 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
           <FadeIn>
             <Link
               href="/courses"
-              className="inline-flex items-center gap-1.5 text-sm text-sky-dim transition-colors hover:text-white"
+              className="-my-2 inline-flex items-center gap-1.5 py-2 text-sm text-sky-dim transition-colors hover:text-white"
             >
               <ArrowLeft className="h-4 w-4" aria-hidden /> All programs
             </Link>

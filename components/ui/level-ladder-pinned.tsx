@@ -38,7 +38,8 @@ export function LevelLadderPinned({ pinLength = 3.4, header }: { pinLength?: num
   useEffect(() => {
     const fit = () => {
       const el = innerRef.current; if (!el) return;
-      const s = Math.min(1, (window.innerHeight - 40) / el.scrollHeight);
+      const reserve = window.innerWidth < 1024 ? 104 : 40; // phones: keep clear of the nav bar
+      const s = Math.min(1, (window.innerHeight - reserve) / el.scrollHeight);
       el.style.transform = s < 0.999 ? `scale(${s})` : "none";
     };
     fit();
@@ -57,28 +58,29 @@ export function LevelLadderPinned({ pinLength = 3.4, header }: { pinLength?: num
 
   return (
     <section ref={sectionRef} className="relative" style={{ height: `${pinLength * 100}vh` }}>
-      <div className="sticky top-0 flex h-screen items-center overflow-hidden">
+      <div className="sticky top-0 flex h-screen items-center overflow-hidden pt-16 lg:pt-0">
         <div ref={innerRef} className="mx-auto w-full max-w-7xl origin-center px-5 sm:px-6 lg:px-8">
           {header}
-          <div className="mt-10 grid items-center gap-6 lg:grid-cols-12 lg:gap-10">
-            <ol className="lg:col-span-5 flex gap-2 overflow-x-auto pb-2 lg:block lg:space-y-1 lg:overflow-visible lg:pb-0" role="tablist">
+          <div className="mt-6 grid items-center gap-4 lg:mt-10 lg:grid-cols-12 lg:gap-10">
+            <ol className="grid grid-cols-4 gap-2 lg:col-span-5 lg:block lg:space-y-1" role="tablist">
               {LEVELS.map((lvl) => {
                 const isActive = lvl.n === active, done = lvl.n < active;
                 const names = courses.filter((c) => c.level === lvl.n).map((c) => c.shortName);
                 return (
-                  <li key={lvl.n} className="shrink-0 lg:shrink">
-                    <button type="button" role="tab" aria-selected={isActive} onClick={() => pick(lvl.n)}
-                      className={cn("group relative flex w-[15.5rem] cursor-pointer items-start gap-4 rounded-2xl border p-4 text-left transition-all duration-300 lg:w-full",
+                  <li key={lvl.n}>
+                    <button type="button" role="tab" aria-selected={isActive} aria-label={`Level ${lvl.n}: ${lvl.blurb}`} onClick={() => pick(lvl.n)}
+                      className={cn("group relative flex w-full cursor-pointer flex-col items-center gap-2 rounded-2xl border p-2 text-center transition-all duration-300 lg:flex-row lg:items-start lg:gap-4 lg:p-4 lg:text-left",
                         isActive ? "border-accent/30 bg-accent/[0.07]" : "border-transparent hover:border-white/10 hover:bg-white/[0.03]")}>
-                      <span className={cn("flex h-12 w-12 shrink-0 items-center justify-center rounded-full border font-display text-base font-bold transition-all duration-300",
+                      <span className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-full border font-display text-base font-bold transition-all duration-300 lg:h-12 lg:w-12",
                         isActive ? "border-accent bg-accent text-ink shadow-[0_0_28px_rgba(52,198,247,0.5)]" : done ? "border-accent/50 bg-accent/15 text-accent" : "border-white/15 bg-ink-2 text-body-soft group-hover:border-white/30")}>
                         {done ? <Check className="h-5 w-5" aria-hidden /> : lvl.n}
                       </span>
-                      <span className="min-w-0 flex-1">
-                        <span className="font-mono text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-sky-dim">Level {lvl.n} · {lvl.label}</span>
-                        <span className={cn("mt-1 block font-display text-[1.05rem] font-bold leading-snug", isActive ? "text-white" : "text-body")}>{lvl.blurb}</span>
-                        <span className="mt-1.5 block truncate text-sm text-sky-dim">{names.join(" · ")}</span>
-                        <span className="mt-3 block h-0.5 w-full overflow-hidden rounded-full bg-white/8">
+                      <span className="w-full min-w-0 flex-1">
+                        <span className="hidden font-mono text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-sky-dim lg:inline">Level {lvl.n} · {lvl.label}</span>
+                        <span className={cn("block text-xs font-semibold lg:hidden", isActive ? "text-white" : "text-sky-dim")}>{lvl.label}</span>
+                        <span className={cn("mt-1 hidden lg:block font-display text-[1.05rem] font-bold leading-snug", isActive ? "text-white" : "text-body")}>{lvl.blurb}</span>
+                        <span className="mt-1.5 hidden truncate text-sm text-sky-dim lg:block">{names.join(" · ")}</span>
+                        <span className="mt-2 block h-0.5 w-full lg:mt-3 overflow-hidden rounded-full bg-white/8">
                           <span ref={(el) => { barRefs.current[lvl.n - 1] = el; }} className="block h-full w-full origin-left scale-x-0 bg-accent" />
                         </span>
                       </span>
@@ -95,7 +97,7 @@ export function LevelLadderPinned({ pinLength = 3.4, header }: { pinLength?: num
                   transition={{ duration: 0.5, ease: EASE_OUT }}
                   className="fx-motion border-gradient relative overflow-hidden rounded-3xl bg-ink-2/70 shadow-card-lg">
                   <div className="grid md:grid-cols-[0.95fr_1.25fr]">
-                    <div className="relative min-h-[200px] overflow-hidden md:min-h-[22rem]">
+                    <div className="relative min-h-[130px] overflow-hidden sm:min-h-[200px] md:min-h-[22rem]">
                       <div ref={imgRef} className="absolute inset-0 will-change-transform">
                         <Image src={lead.image} alt="" fill sizes="(min-width: 1024px) 28vw, 100vw" className="object-cover" />
                       </div>
@@ -105,21 +107,21 @@ export function LevelLadderPinned({ pinLength = 3.4, header }: { pinLength?: num
                         <Chip>{lead.syllabus.length} modules</Chip>
                       </div>
                     </div>
-                    <div className="flex flex-col p-6">
+                    <div className="flex flex-col p-5 sm:p-6">
                       <p className="font-mono text-[0.7rem] font-semibold uppercase tracking-[0.16em] text-accent">Level {active} of 4</p>
-                      <h3 className="font-display mt-3 text-balance text-2xl font-bold leading-tight text-white md:text-[1.6rem]">{lead.title}</h3>
+                      <h3 className="font-display mt-2 text-balance text-xl font-bold sm:mt-3 sm:text-2xl leading-tight text-white md:text-[1.6rem]">{lead.title}</h3>
                       <p className="mt-3 text-[0.98rem] leading-relaxed text-body-soft">{lead.short}</p>
-                      <ul className="mt-5 space-y-2">
+                      <ul className="mt-4 space-y-2 sm:mt-5">
                         {lead.outcomes.slice(0, 3).map((o) => (
                           <li key={o} className="flex gap-2.5 text-sm text-body"><Check className="mt-0.5 h-4 w-4 shrink-0 text-accent" aria-hidden />{o}</li>
                         ))}
                       </ul>
-                      <div className="mt-5 flex flex-wrap gap-2">
+                      <div className="mt-5 hidden flex-wrap gap-2 sm:flex">
                         {lead.roles.map((r) => (
                           <span key={r} className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-xs font-medium text-body-soft">{r}</span>
                         ))}
                       </div>
-                      <div className="mt-auto flex flex-wrap items-center gap-x-6 gap-y-3 pt-7">
+                      <div className="mt-auto flex flex-wrap items-center gap-x-6 gap-y-3 pt-5 sm:pt-7">
                         <Link href={`/courses/${lead.slug}`} className="group/link inline-flex items-center gap-2 font-semibold text-white transition-colors hover:text-accent">
                           View program <ArrowRight className="h-4 w-4 transition-transform group-hover/link:translate-x-1" aria-hidden />
                         </Link>

@@ -353,3 +353,8 @@ html.lenis body {
 /* Intro loader: hidden before paint on repeat visits and for reduced motion */
 .fx-no-loader #fx-loader { display: none; }
 @media (prefers-reduced-motion: reduce) { #fx-loader { display: none; } }
+
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar { display: none; }
+}
