@@ -60,7 +60,7 @@ export default function SkillCheckPopup() {
             Where do you stand <span className="text-gradient animate-gradient-x">in AI?</span>
           </h2>
           <p className="mt-3 text-[15px] leading-relaxed text-body-soft">
-            Brain-cracking maths, LLM internals and graduate-level ML. Climb as far as you can and we&apos;ll match you to the right FutureX course.
+            Interview puzzles, GenAI, then graduate-level ML. Climb as far as you can and we&apos;ll match you to the right FutureX course.
           </p>
 
           {/* Level ladder */}

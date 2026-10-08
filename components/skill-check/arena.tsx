@@ -8,6 +8,8 @@ import {
   type Session,
 } from "@/lib/engine";
 
+// Stages 1-2 are puzzles and GenAI warm-ups; stages 3-4 are graduate level.
+const WARM_UP = { 1: "Warm-up", 2: "Tricky", 3: "Brain-teaser" } as const;
 const DIFFICULTY = {
   1: { label: "Hard", cls: "bg-amber-50 text-amber-700 ring-amber-600/20", dot: "bg-amber-500" },
   2: { label: "Very hard", cls: "bg-red-50 text-red-700 ring-red-600/20", dot: "bg-red-500" },
@@ -102,7 +104,7 @@ export default function Arena({ initial, onFinish }: { initial: Session; onFinis
   const need = passMark(s.chosenLevel, view);
   const mm = String(Math.floor(remaining / 60)).padStart(2, "0"), ss = String(remaining % 60).padStart(2, "0");
   const timeTone = remaining <= 60 ? "#dc2626" : remaining <= 300 ? "#d97706" : "#3b63d9";
-  const diff = DIFFICULTY[q.d];
+  const diff = view < 2 ? { ...DIFFICULTY[q.d], label: WARM_UP[q.d] } : DIFFICULTY[q.d];
   const isMarked = marked.has(key(pos));
 
   return (

@@ -62,7 +62,7 @@ export default function Assessment() {
 
 function Briefing({ s, onBack, onStart }: { s: Session; onBack: () => void; onStart: () => void }) {
   const rules = [
-    ["It starts hard and gets harder", "Expect university-level maths and LLM internals, then graduate-level ML and systems. Answer what you can."],
+    ["Puzzles first, then it gets serious", "Stage 1 is classic interview puzzles, Stage 2 is GenAI. Stages 3 and 4 are graduate-level ML and systems."],
     ["Clear a stage to go up", "Move freely between a stage's questions, then submit. Do well and the next stage unlocks."],
     [`You have ${TIME_LIMIT_SECONDS / 60} minutes`, "Most people finish in about five. Please keep this tab open while you work."],
   ];
@@ -166,7 +166,7 @@ function LeadForm({ s, tabSwitches, onDone }: { s: Session; tabSwitches: number;
 function verdictCopy(r: Report) {
   const L = (n: number) => `Level ${n}`;
   if (!r.chosenLevel) {
-    if (r.top < 0) return { tone: "info", title: "A fresh start, and that's perfect.", body: "These questions are deliberately tough. Level 1 builds the maths and LLM foundations they test, from the ground up." };
+    if (r.top < 0) return { tone: "info", title: "A fresh start, and that's perfect.", body: "Level 1 builds the reasoning and GenAI foundations these stages test, from the ground up." };
     if (r.beyond) return { tone: "info", title: "You're already strong across agents and RAG.", body: `Level 3 will sharpen your deployment skills. Also take a look at the ${LEVEL4.name}.` };
     return { tone: "info", title: `We recommend ${L(r.recommended)}.`, body: `You cleared ${r.stages[r.top].name}, so ${L(r.recommended)} is your natural next step.` };
   }
