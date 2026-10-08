@@ -80,8 +80,9 @@ export default function Arena({ initial, onFinish }: { initial: Session; onFinis
     if (confirming) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.metaKey || e.ctrlKey || e.altKey) return;
-      if (e.key === "ArrowRight") { setDir(1); return setPos(p => Math.min(qs.length - 1, p + 1)); }
-      if (e.key === "ArrowLeft") { setDir(-1); return setPos(p => Math.max(0, p - 1)); }
+      // preventDefault: a focused radio would otherwise also switch the answer on ←/→.
+      if (e.key === "ArrowRight") { e.preventDefault(); setDir(1); return setPos(p => Math.min(qs.length - 1, p + 1)); }
+      if (e.key === "ArrowLeft") { e.preventDefault(); setDir(-1); return setPos(p => Math.max(0, p - 1)); }
       const k = e.key.toUpperCase();
       const idx = "ABCD".includes(k) ? "ABCD".indexOf(k) : "1234".indexOf(k);
       if (idx >= 0 && !locked) setS(cur => choose(cur, view, pos, idx));

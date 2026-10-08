@@ -4,10 +4,11 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowUpRight, Menu, X } from "lucide-react";
+import { ArrowUpRight, Maximize2, Menu, Minimize2, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { nav, socials } from "@/lib/data";
 import { ButtonLink } from "@/components/ui/button";
+import { isTyping } from "@/components/SmoothScroll";
 import { cn, EASE_OUT } from "@/lib/utils";
 
 export default function Nav() {
@@ -94,6 +95,7 @@ export default function Nav() {
           </nav>
 
           <div className="flex items-center gap-2">
+            <FullscreenToggle />
             <ButtonLink href="/contact" size="sm" className="hidden md:inline-flex" arrow="up">
               Enquire
             </ButtonLink>
@@ -169,4 +171,45 @@ export default function Nav() {
       </AnimatePresence>
     </>
   );
+}
+
+// Full-screen toggle for the whole site; F also toggles it (outside form fields).
+function FullscreenToggle() {
+  const [supported, setSupported] = useState(false);
+  const [full, setFull] = useState(false);
+
+  useEffect(() => {
+    setSupported(document.fullscreenEnabled);
+    const onChange = () => setFull(!!document.fullscreenElement);
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key.toLowerCase() !== "f" || e.metaKey || e.ctrlKey || e.altKey || isTyping(e.target)) return;
+      e.preventDefault();
+      toggle();
+    };
+    document.addEventListener("fullscreenchange", onChange);
+    window.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("fullscreenchange", onChange);
+      window.removeEventListener("keydown", onKey);
+    };
+  }, []);
+
+  if (!supported) return null;
+  return (
+    <button
+      type="button"
+      onClick={toggle}
+      aria-pressed={full}
+      aria-label={full ? "Exit full screen (F)" : "Enter full screen (F)"}
+      title={full ? "Exit full screen (F)" : "Full screen (F)"}
+      className="hidden h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-white transition hover:bg-white/[0.1] md:flex"
+    >
+      {full ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+    </button>
+  );
+}
+
+function toggle() {
+  if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+  else document.documentElement.requestFullscreen().catch(() => {});
 }
