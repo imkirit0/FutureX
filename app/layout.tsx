@@ -5,6 +5,7 @@ import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
 import SmoothScroll from "@/components/SmoothScroll";
 import SkillCheckPopup from "@/components/SkillCheckPopup";
+import IntroLoader from "@/components/IntroLoader";
 import { StarsBackground } from "@/components/ui/stars";
 
 const bricolage = Bricolage_Grotesque({ subsets: ["latin"], variable: "--font-bricolage" });
@@ -26,8 +27,12 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${bricolage.variable} ${schibsted.variable} ${jetbrains.variable}`}>
+    <html lang="en" className={`${bricolage.variable} ${schibsted.variable} ${jetbrains.variable}`} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: `try{if(sessionStorage.getItem("fx-loader-seen"))document.documentElement.classList.add("fx-no-loader")}catch(e){}` }} />
+      </head>
       <body>
+        <IntroLoader />
         <div aria-hidden className="pointer-events-none fixed inset-0 -z-10">
           <StarsBackground starColor="#a8c6ff" style={{ background: "radial-gradient(ellipse at bottom, #0c1424 0%, #070b14 100%)" }} />
         </div>
