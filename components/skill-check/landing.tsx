@@ -75,7 +75,7 @@ export default function Landing({ onNew, onPick }: { onNew: () => void; onPick: 
           <PathCard
             icon={GraduationCap}
             title="I've picked a FutureX level"
-            body="Already chosen Level 1, 2 or 3? Course-style questions check whether you have what that level expects."
+            body="Already chosen Level 1, 2 or 3? Engineering-level questions, pitched at NIT / B.Tech students, test the maths, ML and LLM depth that level expects."
             levels={STAGES}
             cta="Check my level"
             onClick={onPick}
