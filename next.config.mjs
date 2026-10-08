@@ -7,7 +7,7 @@ const nextConfig = {
     return [
       ...to("/about", "/about-us"),
       ...to("/contact", "/contact-us"),
-      ...to("/blog", "/blogs", "/:y(\d{4})/:m(\d{2})/:d(\d{2})/:slug*"),
+      ...to("/blog", "/blogs", "/:year(\\d{4})/:rest*"),
       ...to("/courses", "/career", "/services", "/service/:slug*"),
       ...to(
         "/",
