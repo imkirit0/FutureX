@@ -23,6 +23,8 @@ export async function POST(req: Request) {
   // Advisory only, like GATE: shown to counsellors, never changes the result.
   const tabSwitches = Math.min(999, Math.max(0, Math.trunc(Number(body?.tabSwitches) || 0)));
 
+  // A storage failure must not cost the student their results.
+  let saved = true;
   try {
     await saveLead({
       name, email, phone, status, mode: chosenLevel ? 'level-check' : 'new-student', chosen_level: chosenLevel,
@@ -31,8 +33,8 @@ export async function POST(req: Request) {
     });
   } catch (e) {
     console.error('lead insert failed', e);
-    return Response.json({ error: 'We could not save your details. Please try again.' }, { status: 500 });
+    saved = false;
   }
 
-  return Response.json({ report: r });
+  return Response.json({ report: r, saved });
 }

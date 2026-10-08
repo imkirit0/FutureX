@@ -25,6 +25,7 @@ export default function Assessment() {
   const [s, setSession] = useState<Session | null>(null);
   const [tabSwitches, setTabSwitches] = useState(0);
   const [result, setResult] = useState<Report | null>(null);
+  const [saved, setSaved] = useState(true);
 
   // Each screen starts at the top (the landing page is long).
   useEffect(() => { window.scrollTo(0, 0); }, [screen]);
@@ -51,8 +52,8 @@ export default function Assessment() {
           {screen === "pick" && <Pick onBack={() => setScreen("home")} onPick={brief} />}
           {screen === "brief" && s && <Briefing s={s} onBack={() => setScreen("home")} onStart={() => setScreen("quiz")} />}
           {screen === "quiz" && s && <Arena initial={s} onFinish={(done, switches) => { setSession(done); setTabSwitches(switches); setScreen("lead"); }} />}
-          {screen === "lead" && s && <LeadForm s={s} tabSwitches={tabSwitches} onDone={r => { setResult(r); setScreen("result"); }} />}
-          {screen === "result" && result && s && <Result r={result} s={s} onRetake={() => brief(result.chosenLevel)} onHome={() => setScreen("home")} />}
+          {screen === "lead" && s && <LeadForm s={s} tabSwitches={tabSwitches} onDone={(r, ok) => { setResult(r); setSaved(ok); setScreen("result"); }} />}
+          {screen === "result" && result && s && <Result r={result} s={s} saved={saved} onRetake={() => brief(result.chosenLevel)} onHome={() => setScreen("home")} />}
         </div>
       )}
     </>
@@ -102,7 +103,7 @@ function Pick({ onBack, onPick }: { onBack: () => void; onPick: (n: number) => v
   );
 }
 
-function LeadForm({ s, tabSwitches, onDone }: { s: Session; tabSwitches: number; onDone: (r: Report) => void }) {
+function LeadForm({ s, tabSwitches, onDone }: { s: Session; tabSwitches: number; onDone: (r: Report, saved: boolean) => void }) {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -124,7 +125,7 @@ function LeadForm({ s, tabSwitches, onDone }: { s: Session; tabSwitches: number;
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
-      onDone(data.report);
+      onDone(data.report, data.saved !== false);
     } catch (err) {
       setError(err instanceof Error && err.message ? err.message : "Something went wrong. Please try again.");
       setBusy(false);
@@ -176,7 +177,7 @@ function verdictCopy(r: Report) {
 
 const TABS = ["Overview", "Answer review", "Your course"] as const;
 
-function Result({ r, s, onRetake, onHome }: { r: Report; s: Session; onRetake: () => void; onHome: () => void }) {
+function Result({ r, s, saved, onRetake, onHome }: { r: Report; s: Session; saved: boolean; onRetake: () => void; onHome: () => void }) {
   const [tab, setTab] = useState<(typeof TABS)[number]>("Overview");
   const v = verdictCopy(r);
   const tone = { fit: "border-green-500/40 bg-green-500/10", warn: "border-amber-500/40 bg-amber-500/10", info: "border-cyan/50 bg-cyan/10" }[v.tone];
@@ -194,6 +195,11 @@ function Result({ r, s, onRetake, onHome }: { r: Report; s: Session; onRetake: (
         <h2 className="text-2xl font-semibold">{v.title}</h2>
         <p className="mt-1.5 text-muted">{v.body}</p>
       </div>
+      {!saved && (
+        <p role="status" className="-mt-4 mb-8 rounded-xl border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm">
+          We couldn&apos;t save your contact details, so an advisor won&apos;t reach out automatically. <a className="font-semibold text-indigo hover:underline" href="/contact">Contact us</a> to talk through your results.
+        </p>
+      )}
 
       <div role="tablist" aria-label="Report sections" onKeyDown={onTabKey} className="mb-6 flex gap-6 overflow-x-auto border-b border-line">
         {TABS.map(t => (
