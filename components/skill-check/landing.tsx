@@ -26,13 +26,13 @@ export default function Landing({ onNew, onPick }: { onNew: () => void; onPick: 
                 <span className="absolute inline-flex size-full animate-ping rounded-full bg-cyan opacity-60" />
                 <span className="relative inline-flex size-2 rounded-full bg-cyan" />
               </span>
-              Free AI skill check · puzzles to PhD-level
+              Free AI skill check · basics to PhD-level
             </div>
             <h1 className="sc-blur-in mt-6 text-[clamp(38px,5.6vw,68px)] leading-[1.02] [animation-delay:80ms]">
               Find your level in AI. <span className="sc-text-gradient">Start where you belong.</span>
             </h1>
             <p className="sc-blur-in mt-6 max-w-xl text-lg leading-relaxed text-muted [animation-delay:160ms]">
-              A progressive quiz from FutureX AI Lab. It opens with classic interview puzzles and GenAI, climbs to
+              A progressive quiz from FutureX AI Lab. It opens with AI basics and GenAI, climbs to
               graduate-level ML and systems, and matches you to the FutureX course that fits.
             </p>
             <div className="sc-blur-in mt-9 flex flex-wrap gap-3 [animation-delay:240ms]">
@@ -42,7 +42,7 @@ export default function Landing({ onNew, onPick }: { onNew: () => void; onPick: 
               <button className={ghost} onClick={onPick}>I&apos;ve picked a FutureX level</button>
             </div>
             <dl className="sc-blur-in mt-12 flex flex-wrap gap-x-8 gap-y-4 [animation-delay:320ms]">
-              {[[Clock, "20 min", "time limit"], [Layers, "4 stages", "puzzles to expert"], [Gift, "Free", "results + advice"]].map(([Icon, v, l]) => {
+              {[[Clock, "20 min", "time limit"], [Layers, "4 stages", "basics to expert"], [Gift, "Free", "results + advice"]].map(([Icon, v, l]) => {
                 const I = Icon as typeof Clock;
                 return (
                   <div key={l as string} className="flex items-center gap-3">
@@ -149,7 +149,7 @@ export default function Landing({ onNew, onPick }: { onNew: () => void; onPick: 
         <div className="grid gap-3">
           {[
             ["Is it really free?", "Yes. The quiz and your results are free, and so is the follow-up call with an advisor if you want one."],
-            ["How hard is it?", "It climbs. Stage 1 is classic interview puzzles and Stage 2 is everyday GenAI; Stages 3 and 4 are graduate level. There is no pass or fail: stopping early simply shows which level to start at."],
+            ["How hard is it?", "It climbs. Stage 1 is AI basics and Stage 2 is GenAI & tools; Stages 3 and 4 are graduate level. There is no pass or fail: stopping early simply shows which level to start at."],
             ["What happens to my details?", "We ask for your name, email and phone at the end so we can send your results and, with your permission, have an advisor contact you about courses."],
             ["Can I take it again?", "Yes. You'll get a different mix of questions each time."],
           ].map(([q, a]) => (
@@ -242,7 +242,7 @@ function Bento({ icon: Icon, step, title, body, children }: { icon: typeof Targe
 
 // Example of the real quiz screen with floating status chips.
 function HeroVisual() {
-  const options = ["Day 20", "Day 17", "Day 18", "Day 19"];
+  const options = ["A visual glitch on screen", "A very creative poem", "Plausible-sounding but made-up information", "The model running out of memory"];
   return (
     <div className="sc-blur-in relative mx-auto w-full max-w-md [animation-delay:200ms]">
       <div aria-hidden className="absolute -inset-6 rounded-[2rem] bg-gradient-to-br from-indigo/20 via-cyan/10 to-transparent blur-2xl" />
@@ -253,10 +253,10 @@ function HeroVisual() {
           ))}
         </div>
         <div className="mt-4 flex items-center justify-between text-xs text-muted">
-          <span>Stage 1 · Puzzles</span>
-          <span>Question 2 of 4 · <span className="font-medium text-red-700">Tricky</span></span>
+          <span>Stage 2 · Level 1</span>
+          <span>Question 2 of 4 · <span className="font-medium text-amber-700">Medium</span></span>
         </div>
-        <p className="mt-3 font-display text-lg leading-snug font-semibold">A snail climbs 3 m up a 20 m well each day and slips 2 m each night. On which day does it get out?</p>
+        <p className="mt-3 font-display text-lg leading-snug font-semibold">In LLMs, a &ldquo;hallucination&rdquo; is…</p>
         <ul className="mt-4 grid gap-2" aria-hidden>
           {options.map((o, i) => (
             <li key={o} className={`flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm ${i === 2 ? "bg-indigo/10 ring-2 ring-indigo" : "ring-1 ring-line"}`}>
@@ -265,7 +265,7 @@ function HeroVisual() {
             </li>
           ))}
         </ul>
-        <figcaption className="mt-4 border-t border-line pt-3 text-xs text-muted">Example question from Stage 1</figcaption>
+        <figcaption className="mt-4 border-t border-line pt-3 text-xs text-muted">Example question from Stage 2</figcaption>
       </figure>
 
       <div aria-hidden className="sc-float-slow sc-glass absolute -top-5 -left-6 hidden items-center gap-2.5 rounded-xl border border-line px-3.5 py-2.5 sm:flex">
