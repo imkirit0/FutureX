@@ -12,7 +12,6 @@ import {
   Target,
 } from "lucide-react";
 import Hero from "@/components/Hero";
-import DustStory from "@/components/DustStory";
 import { courses, services } from "@/lib/data";
 import { Accordion } from "@/components/ui/accordion";
 import { Chip } from "@/components/ui/badge";
@@ -71,7 +70,6 @@ export default function Home() {
   return (
     <>
       <Hero />
-      <DustStory />
 
       {/* Skill check CTA */}
       <Section>
