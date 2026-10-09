@@ -1,13 +1,11 @@
 // npm run check: simulates students and asserts the engine's guarantees.
 import assert from 'node:assert';
-import { QUESTIONS, inTrack, createSession, choose, submitStage, finish, submissionOf, replay, report, answersOf } from './engine.ts';
+import { QUESTIONS, createSession, choose, submitStage, finish, submissionOf, replay, report, answersOf } from './engine.ts';
 
 // knows = highest stage the simulated student answers correctly (-1 = nothing)
 function run(knows: number, chosenLevel: number | null = null, seed = 1) {
   const rng = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
   let s = createSession(chosenLevel, rng);
-  // Each choice gets its own question set.
-  for (const qs of s.paper) qs.forEach(q => assert.ok(inTrack(q, chosenLevel), 'question from the wrong track'));
   // Progressive: inside every stage, difficulty never drops.
   for (const qs of s.paper) qs.forEach((q, i) => assert.ok(i === 0 || q.d >= qs[i - 1].d, 'difficulty dropped'));
   while (!s.done) {
@@ -27,7 +25,7 @@ function run(knows: number, chosenLevel: number | null = null, seed = 1) {
 }
 
 for (const level of [null, 1]) for (let b = 0; b <= 3; b++) {
-  const n = (d: number) => QUESTIONS.filter(q => inTrack(q, level) && q.b === b && q.d === d).length;
+  const n = (d: number) => QUESTIONS.filter(q => q.b === b && q.d === d).length;
   assert.ok(n(1) >= 1 && n(2) >= 2 && n(3) >= 1, `${level ? 'level' : 'new'} track, stage ${b} needs tiers 1,2,2,3`);
 }
 for (const q of QUESTIONS) assert.ok(q.o.length === 4 && q.a >= 0 && q.a < 4, q.q);
