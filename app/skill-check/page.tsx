@@ -4,7 +4,7 @@ import Assessment from "@/components/skill-check/assessment";
 export const metadata: Metadata = {
   title: "Skill Check",
   description:
-    "A free five-minute quiz from FutureX AI Lab that shows what you already know about AI and which FutureX course to start with.",
+    "A free rapid quiz from FutureX AI Lab, 15 seconds a question, that shows what you already know about AI and which FutureX course to start with.",
 };
 
 export default function SkillCheckPage() {

@@ -7,7 +7,7 @@ import { usePathname } from "next/navigation";
 import { ArrowRight, Clock, Gift, Layers, X } from "lucide-react";
 
 const KEY = "fx-skill-popup-seen";
-const PERKS = [[Clock, "20 min"], [Layers, "4 stages"], [Gift, "Free"]] as const;
+const PERKS = [[Clock, "15s a question"], [Layers, "4 stages"], [Gift, "Free"]] as const;
 
 // Invites visitors to the skill check after 6s on the site; once per browser session.
 export default function SkillCheckPopup() {

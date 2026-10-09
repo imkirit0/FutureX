@@ -2,15 +2,25 @@
 
 import { useEffect, useState } from "react";
 import {
-  LEVEL4, LEVELS, STATUSES, TIME_LIMIT_SECONDS,
-  STAGES, answersOf, createSession, submissionOf,
-  type Report, type Session,
+  LEVEL4, LEVELS, SECONDS_PER_QUESTION, STATUSES, STAGES,
+  createSession, questionCount, submissionOf,
+  type Report, type Session, type Summary,
 } from "@/lib/engine";
 import { DustSphere } from "@/components/ui/dust-sphere";
 import Arena from "./arena";
 import Landing from "./landing";
 
-type Screen = "home" | "pick" | "brief" | "quiz" | "lead" | "result";
+type Screen = "home" | "pick" | "brief" | "quiz" | "grading" | "rejected" | "lead" | "result";
+
+// What the grader hands back; the lead form forwards summary + proof untouched.
+type Graded = { report: Report; summary: Summary; proof: string };
+
+async function post(url: string, body: unknown) {
+  const res = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || "Something went wrong. Please try again.");
+  return data;
+}
 
 const card = "sc-glass rounded-xl border border-line p-6";
 const btn = "inline-flex items-center justify-center rounded-lg bg-brand px-5 py-2.5 text-[15px] font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-40";
@@ -23,8 +33,9 @@ const hoverCard = "transition-colors hover:border-indigo";
 export default function Assessment() {
   const [screen, setScreen] = useState<Screen>("home");
   const [s, setSession] = useState<Session | null>(null);
-  const [tabSwitches, setTabSwitches] = useState(0);
-  const [result, setResult] = useState<Report | null>(null);
+  const [ticket, setTicket] = useState("");
+  const [graded, setGraded] = useState<Graded | null>(null);
+  const [rejected, setRejected] = useState("");
   const [saved, setSaved] = useState(true);
 
   // Each screen starts at the top (the landing page is long).
@@ -32,8 +43,27 @@ export default function Assessment() {
 
   function brief(level: number | null) {
     setSession(createSession(level));
-    setResult(null);
+    setGraded(null);
     setScreen("brief");
+  }
+
+  // The ticket is the server's timestamp for this run; grading refuses runs that took too long.
+  async function start() {
+    const { ticket } = await post("/api/skill-check/start", {});
+    setTicket(ticket);
+    setScreen("quiz");
+  }
+
+  async function finish(done: Session, tabSwitches: number) {
+    setSession(done);
+    setScreen("grading");
+    try {
+      setGraded(await post("/api/skill-check/grade", { ticket, chosenLevel: done.chosenLevel, stages: submissionOf(done), tabSwitches }));
+      setScreen("lead");
+    } catch (err) {
+      setRejected(err instanceof Error ? err.message : "Something went wrong. Please retake the quiz.");
+      setScreen("rejected");
+    }
   }
 
   return (
@@ -50,22 +80,38 @@ export default function Assessment() {
       {screen !== "home" && (
         <div className="mx-auto w-full max-w-5xl px-4 pt-10 pb-16 sm:px-6">
           {screen === "pick" && <Pick onBack={() => setScreen("home")} onPick={brief} />}
-          {screen === "brief" && s && <Briefing s={s} onBack={() => setScreen("home")} onStart={() => setScreen("quiz")} />}
-          {screen === "quiz" && s && <Arena initial={s} onFinish={(done, switches) => { setSession(done); setTabSwitches(switches); setScreen("lead"); }} />}
-          {screen === "lead" && s && <LeadForm s={s} tabSwitches={tabSwitches} onDone={(r, ok) => { setResult(r); setSaved(ok); setScreen("result"); }} />}
-          {screen === "result" && result && s && <Result r={result} s={s} saved={saved} onRetake={() => brief(result.chosenLevel)} onHome={() => setScreen("home")} />}
+          {screen === "brief" && s && <Briefing s={s} onBack={() => setScreen("home")} onStart={start} />}
+          {screen === "quiz" && s && <Arena initial={s} onFinish={finish} />}
+          {screen === "grading" && <p role="status" className="sc-rise mt-10 text-center text-lg text-muted">Scoring your answers…</p>}
+          {screen === "rejected" && s && (
+            <section className="sc-rise mx-auto mt-6 max-w-xl">
+              <div className={eyebrow}>Not scored</div>
+              <h1 className={h1}>We couldn&apos;t score this attempt.</h1>
+              <p role="alert" className="mb-6 text-muted">{rejected}</p>
+              <button className={btn} onClick={() => brief(s.chosenLevel)}>Retake the quiz</button>
+            </section>
+          )}
+          {screen === "lead" && graded && <LeadForm graded={graded} onDone={ok => { setSaved(ok); setScreen("result"); }} />}
+          {screen === "result" && graded && <Result r={graded.report} saved={saved} onRetake={() => brief(graded.report.chosenLevel)} onHome={() => setScreen("home")} />}
         </div>
       )}
     </>
   );
 }
 
-function Briefing({ s, onBack, onStart }: { s: Session; onBack: () => void; onStart: () => void }) {
+function Briefing({ s, onBack, onStart }: { s: Session; onBack: () => void; onStart: () => Promise<void> }) {
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const n = questionCount(s.chosenLevel);
   const rules = [
     ["It starts with the basics, then gets serious", "Stage 1 is AI basics, Stages 2 and 3 are engineering-level GenAI and ML, and Stage 4 is graduate-level agents and systems."],
-    ["Clear a stage to go up", "Move freely between a stage's questions, then submit. Do well and the next stage unlocks."],
-    [`You have ${TIME_LIMIT_SECONDS / 60} minutes`, "Most people finish in about five. Please keep this tab open while you work."],
+    [`${SECONDS_PER_QUESTION} seconds per question, no going back`, `${n} questions, one at a time. Pick an answer and the next question appears. If the clock runs out, that question counts as unanswered and you move on.`],
+    ["Clear a stage to go up", "You answer every stage in one run. We score it stage by stage: pass one and the next counts, fail one and your level is set there."],
   ];
+  async function go() {
+    setBusy(true); setError("");
+    try { await onStart(); } catch (err) { setError(err instanceof Error ? err.message : "Could not start. Please try again."); setBusy(false); }
+  }
   return (
     <section className="sc-rise mx-auto max-w-2xl">
       <button onClick={onBack} className="text-muted hover:text-lite">← Back</button>
@@ -79,7 +125,8 @@ function Briefing({ s, onBack, onStart }: { s: Session; onBack: () => void; onSt
           </li>
         ))}
       </ol>
-      <div className="mt-8 flex justify-end"><button className={btn} onClick={onStart}>Start the quiz</button></div>
+      {error && <p role="alert" className="mt-4 text-sm text-red-600">{error}</p>}
+      <div className="mt-8 flex justify-end"><button className={btn} onClick={go} disabled={busy}>{busy ? "Starting…" : `Start · about ${Math.ceil(n * SECONDS_PER_QUESTION / 60)} min`}</button></div>
     </section>
   );
 }
@@ -103,7 +150,7 @@ function Pick({ onBack, onPick }: { onBack: () => void; onPick: (n: number) => v
   );
 }
 
-function LeadForm({ s, tabSwitches, onDone }: { s: Session; tabSwitches: number; onDone: (r: Report, saved: boolean) => void }) {
+function LeadForm({ graded, onDone }: { graded: Graded; onDone: (saved: boolean) => void }) {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -112,20 +159,12 @@ function LeadForm({ s, tabSwitches, onDone }: { s: Session; tabSwitches: number;
     const f = new FormData(e.currentTarget);
     setBusy(true); setError("");
     try {
-      const res = await fetch("/api/leads", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: f.get("name"), email: f.get("email"), phone: f.get("phone"), status: f.get("status"),
-          consent: f.get("consent") === "on",
-          chosenLevel: s.chosenLevel,
-          stages: submissionOf(s),
-          tabSwitches,
-        }),
+      const data = await post("/api/leads", {
+        name: f.get("name"), email: f.get("email"), phone: f.get("phone"), status: f.get("status"),
+        consent: f.get("consent") === "on",
+        summary: graded.summary, proof: graded.proof,
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
-      onDone(data.report, data.saved !== false);
+      onDone(data.saved !== false);
     } catch (err) {
       setError(err instanceof Error && err.message ? err.message : "Something went wrong. Please try again.");
       setBusy(false);
@@ -177,7 +216,7 @@ function verdictCopy(r: Report) {
 
 const TABS = ["Overview", "Answer review", "Your course"] as const;
 
-function Result({ r, s, saved, onRetake, onHome }: { r: Report; s: Session; saved: boolean; onRetake: () => void; onHome: () => void }) {
+function Result({ r, saved, onRetake, onHome }: { r: Report; saved: boolean; onRetake: () => void; onHome: () => void }) {
   const [tab, setTab] = useState<(typeof TABS)[number]>("Overview");
   const v = verdictCopy(r);
   const tone = { fit: "border-green-500/40 bg-green-500/10", warn: "border-amber-500/40 bg-amber-500/10", info: "border-cyan/50 bg-cyan/10" }[v.tone];
@@ -213,7 +252,7 @@ function Result({ r, s, saved, onRetake, onHome }: { r: Report; s: Session; save
 
       <div key={tab} id="report-panel" role="tabpanel" className="sc-rise" aria-labelledby={`tab-${tab}`}>
         {tab === "Overview" && <Overview r={r} />}
-        {tab === "Answer review" && <Review s={s} />}
+        {tab === "Answer review" && <Review r={r} />}
         {tab === "Your course" && <Course r={r} />}
       </div>
 
@@ -256,18 +295,19 @@ function Overview({ r }: { r: Report }) {
   );
 }
 
-function Review({ s }: { s: Session }) {
-  const answers = answersOf(s);
+function Review({ r }: { r: Report }) {
   return (
     <div className="grid gap-6">
       {STAGES.map((name, b) => {
-        const items = answers.filter(a => a.q.b === b);
+        const items = r.review.filter(a => a.b === b);
         if (!items.length) return null;
         return (
           <div key={name}>
             <h3 className="mb-3 text-sm font-semibold text-muted">Stage {b + 1} · {name}</h3>
             <ol className="grid gap-3">
-              {items.map(({ q, choice, correct }, i) => (
+              {items.map((q, i) => {
+                const { choice, correct } = q;
+                return (
                 <li key={q.q} className={`${card} p-5`}>
                   <p className="text-xs text-muted">Q{i + 1} · {q.t} · <span className={correct ? "text-green-700" : "text-red-600"}>{correct ? "Correct" : choice === null ? "Not answered" : "Incorrect"}</span></p>
                   <p className="mt-1.5 font-semibold">{q.q}</p>
@@ -275,7 +315,8 @@ function Review({ s }: { s: Session }) {
                   <p className="mt-1 text-sm text-green-700">Correct answer: {q.o[q.a]}</p>
                   <p className="mt-2 text-sm text-muted">{q.e}</p>
                 </li>
-              ))}
+                );
+              })}
             </ol>
           </div>
         );

@@ -42,7 +42,7 @@ export default function Landing({ onNew, onPick }: { onNew: () => void; onPick: 
               <button className={ghost} onClick={onPick}>I&apos;ve picked a FutureX level</button>
             </div>
             <dl className="sc-blur-in mt-12 flex flex-wrap gap-x-8 gap-y-4 [animation-delay:320ms]">
-              {[[Clock, "20 min", "time limit"], [Layers, "4 stages", "basics to expert"], [Gift, "Free", "results + advice"]].map(([Icon, v, l]) => {
+              {[[Clock, "15 sec", "per question"], [Layers, "4 stages", "basics to expert"], [Gift, "Free", "results + advice"]].map(([Icon, v, l]) => {
                 const I = Icon as typeof Clock;
                 return (
                   <div key={l as string} className="flex items-center gap-3">
