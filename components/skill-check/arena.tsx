@@ -1,14 +1,16 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Check, Keyboard, Lock, Zap } from "lucide-react";
-import { SECONDS_PER_QUESTION, STAGES, choose, type Session } from "@/lib/engine";
+import { Check, Keyboard, Lock, RefreshCw, Zap } from "lucide-react";
+import { MAX_SWAPS_PER_STAGE, SECONDS_PER_QUESTION, STAGES, choose, swapQuestion, type Session } from "@/lib/engine";
 
-// Rapid quiz: every question gets SECONDS_PER_QUESTION on its own clock, one question on
-// screen at a time, never backwards. Picking an answer moves on at once; running out of time
-// moves on with no answer (which the server grades as wrong). The clock is wall time, so
-// hiding the tab or stalling the page doesn't buy anything, and the server bounds the whole
-// run separately (lib/grade.ts).
+// Rapid quiz, one stage at a time. Every question gets SECONDS_PER_QUESTION on its own clock,
+// one question on screen, never backwards. Picking an answer moves on at once. Running out of
+// time swaps in a fresh question of the same difficulty, up to MAX_SWAPS_PER_STAGE times per
+// stage; after that the question counts as unanswered. When a stage is complete the server
+// grades it: pass and the next stage unlocks, fail and the test ends there. The clock is wall
+// time, so hiding the tab or stalling the page doesn't buy anything, and the server bounds the
+// whole run separately (lib/grade.ts).
 
 // Stages 1-2 use gentler tags; stages 3-4 are the serious end.
 const WARM_UP = { 1: "Easy", 2: "Medium", 3: "Hard" } as const;
@@ -21,21 +23,30 @@ const DIFFICULTY = {
 const ADVANCE_MS = 350; // the picked answer lights up briefly before the next question
 const STAGE_CARD_MS = 1800; // each stage opens with a card; the clock starts after it
 
-export default function Arena({ initial, onFinish }: { initial: Session; onFinish: (s: Session, tabSwitches: number) => void }) {
-  const order = useRef(initial.paper.flatMap((qs, b) => qs.map((_, i) => [b, i] as const))).current;
+type Phase = "card" | "quiz" | "checking" | "error";
+
+export default function Arena({ initial, gradeStage }: {
+  initial: Session;
+  // Sends stages 0..stage for grading. Resolves true when the test is over (the parent then
+  // shows the results flow), false when the next stage may begin. Rejects on network trouble.
+  gradeStage: (s: Session, stage: number, tabSwitches: number) => Promise<boolean>;
+}) {
   const [s, setS] = useState(initial);
-  const [idx, setIdx] = useState(0);
-  const [opening, setOpening] = useState(true); // showing the stage card
-  const [deadline, setDeadline] = useState(() => Date.now() + STAGE_CARD_MS + SECONDS_PER_QUESTION * 1000);
+  const [b, setB] = useState(0); // open stage
+  const [i, setI] = useState(0); // question inside it
+  const [phase, setPhase] = useState<Phase>("card");
+  const [swaps, setSwaps] = useState(0); // used in this stage
+  const [swapped, setSwapped] = useState(false); // the question on screen replaced a timed-out one
+  const [deadline, setDeadline] = useState(0);
   const [now, setNow] = useState(() => Date.now());
   const [chosen, setChosen] = useState<number | null>(null); // the answer lit up while advancing
+  const [error, setError] = useState("");
   const tabSwitches = useRef(0);
-  const finished = useRef(false);
-  const advancing = useRef(false);
+  const busy = useRef(false);
 
-  const [b, i] = order[idx];
-  const q = s.paper[b][i];
-  const remainingMs = Math.max(0, deadline - now);
+  const qs = s.paper[b];
+  const q = qs[i];
+  const remainingMs = phase === "quiz" ? Math.max(0, deadline - now) : SECONDS_PER_QUESTION * 1000;
   const remaining = Math.ceil(remainingMs / 1000);
 
   // Smooth ring, and the deadline is checked on every tick.
@@ -53,41 +64,60 @@ export default function Arena({ initial, onFinish }: { initial: Session; onFinis
     return () => { document.removeEventListener("visibilitychange", onVis); window.removeEventListener("beforeunload", warn); };
   }, []);
 
+  // The stage card gives way to its first question on its own.
+  useEffect(() => {
+    if (phase !== "card") return;
+    const id = setTimeout(() => { setDeadline(Date.now() + SECONDS_PER_QUESTION * 1000); setPhase("quiz"); }, STAGE_CARD_MS);
+    return () => clearTimeout(id);
+  }, [phase, b]);
+
+  async function check(next: Session) {
+    setPhase("checking");
+    try {
+      if (await gradeStage(next, b, tabSwitches.current)) return;
+      // The stage passed and a harder one unlocks.
+      setB(b + 1); setI(0); setSwaps(0); setPhase("card");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not reach the server.");
+      setPhase("error");
+    } finally {
+      busy.current = false;
+    }
+  }
+
   function advance(next: Session) {
-    if (advancing.current) return;
-    advancing.current = true;
+    if (busy.current) return;
+    busy.current = true;
     setS(next);
     setTimeout(() => {
-      advancing.current = false;
       setChosen(null);
-      if (idx + 1 >= order.length) {
-        if (finished.current) return;
-        finished.current = true;
-        return onFinish(next, tabSwitches.current);
+      setSwapped(false);
+      if (i + 1 < qs.length) {
+        busy.current = false;
+        setI(i + 1);
+        setDeadline(Date.now() + SECONDS_PER_QUESTION * 1000);
+      } else {
+        void check(next);
       }
-      const newStage = order[idx + 1][1] === 0;
-      setIdx(idx + 1);
-      setOpening(newStage);
-      setDeadline(Date.now() + (newStage ? STAGE_CARD_MS : 0) + SECONDS_PER_QUESTION * 1000);
     }, ADVANCE_MS);
   }
 
-  // The stage card gives way to its first question on its own.
-  useEffect(() => {
-    if (!opening) return;
-    const id = setTimeout(() => setOpening(false), STAGE_CARD_MS);
-    return () => clearTimeout(id);
-  }, [opening, idx]);
-
   function pick(choice: number) {
-    if (advancing.current || opening) return;
+    if (busy.current || phase !== "quiz") return;
     setChosen(choice);
     advance(choose(s, b, i, choice));
   }
 
-  // Time's up: this question stays unanswered and the next one appears.
+  // Time's up: a fresh question if swaps remain, otherwise this one stays unanswered.
   useEffect(() => {
-    if (remainingMs === 0 && !advancing.current) advance(s);
+    if (phase !== "quiz" || remainingMs > 0 || busy.current) return;
+    const fresh = swaps < MAX_SWAPS_PER_STAGE ? swapQuestion(s, b, i) : s;
+    if (fresh !== s) {
+      setS(fresh); setSwaps(swaps + 1); setSwapped(true);
+      setDeadline(Date.now() + SECONDS_PER_QUESTION * 1000);
+    } else {
+      advance(s);
+    }
   });
 
   // Keyboard: A–D (or 1–4) answers.
@@ -105,7 +135,9 @@ export default function Arena({ initial, onFinish }: { initial: Session; onFinis
   const diff = b < 2 ? { ...DIFFICULTY[q.d], label: WARM_UP[q.d] } : DIFFICULTY[q.d];
   const [stageLabel, stageTopic] = STAGES[b].split(" · ");
   const tone = remaining <= 5 ? "#dc2626" : remaining <= 10 ? "#d97706" : "#3b63d9";
+  const swapsLeft = MAX_SWAPS_PER_STAGE - swaps;
   const block = (e: React.SyntheticEvent) => e.preventDefault(); // no copy, no right-click: nothing to paste into a search box
+  const panel = "rounded-2xl border border-line bg-white shadow-[0_1px_2px_rgb(16_24_40/.04),0_24px_48px_-28px_rgb(16_24_40/.22)]";
 
   return (
     <div className="-mx-4 sm:-mx-6" onCopy={block} onContextMenu={block} onDragStart={block}>
@@ -113,16 +145,16 @@ export default function Arena({ initial, onFinish }: { initial: Session; onFinis
         <div className="sc-glass mx-auto flex max-w-5xl items-center gap-4 rounded-2xl border border-line px-3 py-3 sm:px-4">
           <ol aria-label="Stages" className="relative -my-1 flex flex-1 items-stretch gap-1.5 overflow-x-auto px-1 py-1 sm:gap-2">
             {STAGES.map((name, sb) => {
-              const state = sb < b ? "done" : sb === b ? "open" : "upcoming";
+              const state = sb < b ? "cleared" : sb === b ? "open" : "locked";
               const [label, topic] = name.split(" · ");
               return (
                 <li key={name} className="flex min-w-[8.5rem] flex-1 items-center gap-1.5 sm:gap-2">
-                  <div aria-current={state === "open" ? "step" : undefined} title={name}
+                  <div aria-current={state === "open" ? "step" : undefined} title={state === "locked" ? "Clear the previous stage to unlock" : name}
                     className={`flex w-full items-center gap-2.5 rounded-xl px-2.5 py-2 text-left transition-all
-                      ${state === "open" ? "bg-white shadow-[0_6px_18px_-10px_rgb(59_99_217/.6)] ring-1 ring-indigo/40" : state === "upcoming" ? "opacity-55" : ""}`}>
+                      ${state === "open" ? "bg-white shadow-[0_6px_18px_-10px_rgb(59_99_217/.6)] ring-1 ring-indigo/40" : state === "locked" ? "opacity-55" : ""}`}>
                     <span className={`grid size-8 flex-none place-items-center rounded-lg text-xs font-bold transition-colors
-                      ${state === "done" ? "bg-green-500 text-white" : state === "open" ? "bg-brand" : "bg-surface-2 text-muted ring-1 ring-line"}`}>
-                      {state === "done" ? <Check className="size-4" /> : state === "upcoming" ? <Lock className="size-3.5" /> : sb + 1}
+                      ${state === "cleared" ? "bg-green-500 text-white" : state === "open" ? "bg-brand" : "bg-surface-2 text-muted ring-1 ring-line"}`}>
+                      {state === "cleared" ? <Check className="size-4" /> : state === "locked" ? <Lock className="size-3.5" /> : sb + 1}
                     </span>
                     <span className="min-w-0">
                       <span className="block text-[11px] font-semibold uppercase tracking-wider text-muted">Stage {sb + 1}</span>
@@ -138,35 +170,63 @@ export default function Arena({ initial, onFinish }: { initial: Session; onFinis
               );
             })}
           </ol>
-          <TimerRing remainingMs={opening ? SECONDS_PER_QUESTION * 1000 : remainingMs} remaining={opening ? SECONDS_PER_QUESTION : remaining} tone={opening ? "#3b63d9" : tone} />
+          <TimerRing remainingMs={remainingMs} remaining={remaining} tone={phase === "quiz" ? tone : "#3b63d9"} />
         </div>
       </header>
 
       <div className="mx-auto max-w-3xl px-4 py-6 sm:px-6">
-        {opening ? (
-          <section key={`stage-${b}`} role="status" className="sc-rise rounded-2xl border border-line bg-white p-8 text-center shadow-[0_1px_2px_rgb(16_24_40/.04),0_24px_48px_-28px_rgb(16_24_40/.22)] sm:p-12">
+        {phase === "card" && (
+          <section key={`stage-${b}`} role="status" className={`sc-rise ${panel} p-8 text-center sm:p-12`}>
+            {b > 0 && (
+              <p className="mx-auto mb-5 inline-flex items-center gap-2 rounded-full bg-green-50 px-3 py-1 text-sm font-semibold text-green-800 ring-1 ring-green-600/20">
+                <Check className="size-4" />Stage {b} cleared
+              </p>
+            )}
             <span className="mx-auto grid size-14 place-items-center rounded-2xl bg-brand text-xl font-bold">{b + 1}</span>
-            <p className="mt-5 text-[11px] font-semibold uppercase tracking-wider text-muted">Stage {b + 1} of {STAGES.length}</p>
+            <p className="mt-5 text-[11px] font-semibold uppercase tracking-wider text-muted">Stage {b + 1} of {STAGES.length} {b > 0 ? "unlocked" : ""}</p>
             <h2 className="mt-1 text-[1.6rem] leading-tight sm:text-[2rem]">{stageTopic ?? stageLabel}</h2>
             <p className="mt-3 text-sm text-muted">
-              {s.paper[b].length} questions · {SECONDS_PER_QUESTION} seconds each{b > 0 ? " · harder than the last stage" : ""}
+              {qs.length} questions · {SECONDS_PER_QUESTION} seconds each{b > 0 ? " · harder than the last stage" : ""}
             </p>
           </section>
-        ) : (
-        <article className="relative select-none overflow-hidden rounded-2xl border border-line bg-white shadow-[0_1px_2px_rgb(16_24_40/.04),0_24px_48px_-28px_rgb(16_24_40/.22)]">
+        )}
+
+        {phase === "checking" && (
+          <section role="status" className={`sc-rise ${panel} p-12 text-center`}>
+            <RefreshCw className="mx-auto size-8 animate-spin text-indigo" aria-hidden />
+            <p className="mt-4 text-lg font-semibold">Checking Stage {b + 1}…</p>
+            <p className="mt-1 text-sm text-muted">Pass and Stage {b + 2} unlocks.</p>
+          </section>
+        )}
+
+        {phase === "error" && (
+          <section className={`sc-rise ${panel} p-8 text-center`}>
+            <p className="text-lg font-semibold">We couldn&apos;t check your stage.</p>
+            <p role="alert" className="mt-1 text-sm text-muted">{error}</p>
+            <button onClick={() => { busy.current = true; void check(s); }}
+              className="mt-6 inline-flex items-center gap-2 rounded-xl bg-brand px-5 py-2.5 text-sm font-semibold">
+              <RefreshCw className="size-4" />Try again
+            </button>
+          </section>
+        )}
+
+        {phase === "quiz" && (
+        <article className={`relative select-none overflow-hidden ${panel}`}>
           <div className="h-1 bg-surface-2" aria-hidden>
-            <div className="h-full bg-gradient-to-r from-indigo to-cyan transition-all duration-500" style={{ width: `${(idx / order.length) * 100}%` }} />
+            <div className="h-full bg-gradient-to-r from-indigo to-cyan transition-all duration-500" style={{ width: `${(i / qs.length) * 100}%` }} />
           </div>
 
-          <div key={idx} className="sc-slide-in">
+          <div key={`${b}-${i}-${swaps}`} className="sc-slide-in">
             <div className="p-5 sm:p-8">
               <div className="flex flex-wrap items-center gap-2 text-xs">
-                <span className="rounded-full bg-indigo/10 px-2.5 py-1 font-semibold text-indigo">Question {i + 1} of {s.paper[b].length}</span>
+                <span className="rounded-full bg-indigo/10 px-2.5 py-1 font-semibold text-indigo">Question {i + 1} of {qs.length}</span>
                 <span className="rounded-full bg-surface-2 px-2.5 py-1 font-medium text-muted ring-1 ring-line">{q.t}</span>
                 <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 font-semibold ring-1 ${diff.cls}`}>
                   <span className={`size-1.5 rounded-full ${diff.dot}`} />{diff.label}
                 </span>
-                <span className="inline-flex items-center gap-1 rounded-full bg-indigo/10 px-2.5 py-1 font-semibold text-indigo"><Zap className="size-3" />{SECONDS_PER_QUESTION}s each</span>
+                {swapped
+                  ? <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 font-semibold text-amber-700 ring-1 ring-amber-600/20"><RefreshCw className="size-3" />New question · {swapsLeft} swap{swapsLeft === 1 ? "" : "s"} left</span>
+                  : <span className="inline-flex items-center gap-1 rounded-full bg-indigo/10 px-2.5 py-1 font-semibold text-indigo"><Zap className="size-3" />{SECONDS_PER_QUESTION}s each</span>}
               </div>
               <h2 className="mt-4 text-balance text-[1.35rem] leading-snug sm:text-[1.7rem]">{q.q}</h2>
 
@@ -196,7 +256,10 @@ export default function Arena({ initial, onFinish }: { initial: Session; onFinis
             </div>
 
             <div className="flex items-center justify-between gap-3 border-t border-line bg-surface-2/60 px-5 py-4 text-xs text-muted sm:px-8">
-              <span>No going back. If the clock runs out, the question counts as unanswered and the next one appears.</span>
+              <span>
+                No going back. Run out of time and you get a new question
+                {swapsLeft > 0 ? ` (${swapsLeft} left this stage)` : " (none left this stage, so it counts as unanswered)"}.
+              </span>
               <span className="hidden items-center gap-1.5 whitespace-nowrap md:inline-flex">
                 <Keyboard className="size-3.5" /><Kbd>A</Kbd>–<Kbd>D</Kbd> to answer
               </span>

@@ -2,7 +2,7 @@ import 'server-only';
 import { createHash, createHmac, timingSafeEqual } from 'node:crypto';
 import { ANSWERS } from './answers.ts';
 import {
-  QUESTIONS, SECONDS_PER_QUESTION, STAGES, passMark, questionCount, tiersFor,
+  MAX_SWAPS_PER_STAGE, QUESTIONS, SECONDS_PER_QUESTION, STAGES, passMark, questionCount, tiersFor,
   type Choice, type Question, type Report, type Session, type StageSubmission, type Summary,
 } from './engine.ts';
 
@@ -13,19 +13,21 @@ export type Graded = Session & { stage: number; passed: number; done: boolean };
 
 export const stageScore = (s: Session, b: number) => s.paper[b].filter((q, i) => s.picks[b][i] === answerOf(q)).length;
 
-// Walk the stages in order: the climb stops at the first stage below its pass mark.
+// Walk the answered stages in order: the climb stops at the first stage below its pass mark.
+// `done` is false while every answered stage passed and harder ones remain.
 export function grade(s: Session): Graded {
   let passed = 0;
-  for (let b = 0; b < STAGES.length; b++) {
+  for (let b = 0; b < s.paper.length; b++) {
     if (stageScore(s, b) < passMark(s.chosenLevel, b)) return { ...s, stage: b, passed, done: true };
     passed = b + 1;
   }
-  return { ...s, stage: STAGES.length - 1, passed, done: true };
+  return { ...s, stage: Math.min(passed, STAGES.length - 1), passed, done: passed === STAGES.length };
 }
 
-// Rebuild the session from the submitted papers so results can't be faked.
+// Rebuild the session from the papers answered so far (stages 0..n) so results can't be faked.
+// A stage after a failed one is a tampered submission: the test should have ended.
 export function replay(chosenLevel: number | null, stages: unknown): Session | null {
-  if (!Array.isArray(stages) || stages.length !== STAGES.length) return null;
+  if (!Array.isArray(stages) || stages.length < 1 || stages.length > STAGES.length) return null;
   const s: Session = { chosenLevel, paper: [], picks: [] };
   for (const [b, st] of (stages as StageSubmission[]).entries()) {
     const tiers = tiersFor(chosenLevel, b);
@@ -37,6 +39,8 @@ export function replay(chosenLevel: number | null, stages: unknown): Session | n
     s.paper[b] = qs;
     s.picks[b] = choices;
   }
+  const g = grade(s);
+  if (g.done && g.stage < stages.length - 1) return null;
   return s;
 }
 
@@ -96,9 +100,11 @@ const verify = (msg: string, sig: unknown) => {
 };
 
 // A ticket is issued when the student presses Start; grading rejects answers that arrive
-// after the quiz could possibly have run (every question timed out) plus a little slack.
-export const GRACE_SECONDS = 45;
-export const timeAllowed = (chosenLevel: number | null) => questionCount(chosenLevel) * (SECONDS_PER_QUESTION + 1) + GRACE_SECONDS;
+// after the quiz could possibly have run (every question and every swap timed out) plus slack
+// for stage cards and grading round trips.
+export const GRACE_SECONDS = 60;
+export const timeAllowed = (chosenLevel: number | null) =>
+  (questionCount(chosenLevel) + STAGES.length * MAX_SWAPS_PER_STAGE) * (SECONDS_PER_QUESTION + 1) + GRACE_SECONDS;
 
 export function issueTicket(): string {
   const t = Date.now().toString(36);

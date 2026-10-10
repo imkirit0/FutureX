@@ -233,14 +233,16 @@ export const QUESTIONS: Question[] = [
 
 export const STATUSES = ['School student', 'College student', 'Graduate / job seeker', 'Working professional'];
 
-// Rapid quiz: one question at a time, 15 seconds each, no going back. A question that
-// times out counts as wrong (not replaced, or students would skip until they saw one they knew).
+// Rapid quiz: one question at a time, 15 seconds each, no going back. A question that times
+// out is swapped for a fresh one of the same difficulty, at most MAX_SWAPS_PER_STAGE times per
+// stage (a cap, or students would skip until they saw one they knew); after that it counts as wrong.
 export const SECONDS_PER_QUESTION = 15;
+export const MAX_SWAPS_PER_STAGE = 3;
 
-// Each stage is a short paper ordered by difficulty. The student answers every stage in one
-// run; the server then grades stage by stage: pass and the next (harder) stage counts, fail
-// and the climb stops there. Stages below the chosen level's prerequisite are a quick check:
-// 3 questions, 2 to pass. The stages that decide the recommendation are 4 questions, 3 to pass.
+// Each stage is a short paper ordered by difficulty. The server grades a stage as soon as it is
+// answered: pass and the next (harder) stage unlocks, fail and the test ends there. Stages below
+// the chosen level's prerequisite are a quick check: 3 questions, 2 to pass. The stages that
+// decide the recommendation are 4 questions, 3 to pass.
 export type Tier = 1 | 2 | 3;
 export const isQuick = (chosenLevel: number | null, stage: number) => !!chosenLevel && stage < chosenLevel - 1;
 export const passMark = (chosenLevel: number | null, stage: number) => (isQuick(chosenLevel, stage) ? 2 : 3);
@@ -273,9 +275,22 @@ export function choose(s: Session, stage: number, i: number, choice: Choice): Se
   return { ...s, picks };
 }
 
+// Replace a question with an unseen one of the same stage and tier. Returns `s` itself when
+// the bank has nothing left to offer, so callers can tell nothing changed.
+export function swapQuestion(s: Session, stage: number, i: number, rng: () => number = Math.random): Session {
+  const old = s.paper[stage][i];
+  const used = new Set(s.paper.flat());
+  const pool = QUESTIONS.filter(q => q.b === old.b && q.d === old.d && !used.has(q));
+  if (!pool.length) return s;
+  const paper = s.paper.map(r => r.slice());
+  paper[stage][i] = pool[Math.floor(rng() * pool.length)];
+  return { ...s, paper };
+}
+
 export type StageSubmission = { ids: number[]; choices: Choice[] };
-export const submissionOf = (s: Session): StageSubmission[] =>
-  s.paper.map((qs, b) => ({ ids: qs.map(q => QUESTIONS.indexOf(q)), choices: s.picks[b] }));
+// The papers answered so far: stages 0..upTo, sent after each stage for grading.
+export const submissionOf = (s: Session, upTo = STAGES.length - 1): StageSubmission[] =>
+  s.paper.slice(0, upTo + 1).map((qs, b) => ({ ids: qs.map(q => QUESTIONS.indexOf(q)), choices: s.picks[b] }));
 
 // What the server sends back after grading. `summary` is what gets stored with the lead;
 // `proof` is the server's signature over it (see lib/grade.ts).

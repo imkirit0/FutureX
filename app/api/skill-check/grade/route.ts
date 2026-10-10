@@ -1,4 +1,4 @@
-import { proofOf, replay, report, summaryOf, ticketAgeSeconds, timeAllowed } from '@/lib/grade';
+import { grade, proofOf, replay, report, summaryOf, ticketAgeSeconds, timeAllowed } from '@/lib/grade';
 
 export async function POST(req: Request) {
   const body = await req.json().catch(() => null);
@@ -11,9 +11,12 @@ export async function POST(req: Request) {
   const session = replay(chosenLevel, body?.stages);
   if (!session) return Response.json({ error: 'Assessment data is invalid. Please retake the test.' }, { status: 400 });
 
+  // Called after every stage: either the next stage unlocks, or the test is over and graded.
+  if (!grade(session).done) return Response.json({ done: false });
+
   // Advisory only, like GATE: shown to counsellors, never changes the result.
   const tabSwitches = Math.min(999, Math.max(0, Math.trunc(Number(body?.tabSwitches) || 0)));
   const r = report(session, tabSwitches);
   const summary = summaryOf(r);
-  return Response.json({ report: r, summary, proof: proofOf(summary) });
+  return Response.json({ done: true, report: r, summary, proof: proofOf(summary) });
 }

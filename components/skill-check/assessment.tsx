@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import {
-  LEVEL4, LEVELS, SECONDS_PER_QUESTION, STATUSES, STAGES,
+  LEVEL4, LEVELS, MAX_SWAPS_PER_STAGE, SECONDS_PER_QUESTION, STATUSES, STAGES,
   createSession, questionCount, submissionOf,
   type Report, type Session, type Summary,
 } from "@/lib/engine";
@@ -10,15 +10,16 @@ import { DustSphere } from "@/components/ui/dust-sphere";
 import Arena from "./arena";
 import Landing from "./landing";
 
-type Screen = "home" | "pick" | "brief" | "quiz" | "grading" | "rejected" | "lead" | "result";
+type Screen = "home" | "pick" | "brief" | "quiz" | "rejected" | "lead" | "result";
 
 // What the grader hands back; the lead form forwards summary + proof untouched.
 type Graded = { report: Report; summary: Summary; proof: string };
 
+class HttpError extends Error { constructor(msg: string, public status: number) { super(msg); } }
 async function post(url: string, body: unknown) {
   const res = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.error || "Something went wrong. Please try again.");
+  if (!res.ok) throw new HttpError(data.error || "Something went wrong. Please try again.", res.status);
   return data;
 }
 
@@ -54,15 +55,22 @@ export default function Assessment() {
     setScreen("quiz");
   }
 
-  async function finish(done: Session, tabSwitches: number) {
-    setSession(done);
-    setScreen("grading");
+  // After each stage the server grades what has been answered so far. It either unlocks the
+  // next stage (false) or ends the test with a report (true). A rejection (invalid data, out
+  // of time) ends the attempt; a network failure is thrown back so the arena can retry.
+  async function gradeStage(cur: Session, stage: number, tabSwitches: number): Promise<boolean> {
+    setSession(cur);
     try {
-      setGraded(await post("/api/skill-check/grade", { ticket, chosenLevel: done.chosenLevel, stages: submissionOf(done), tabSwitches }));
+      const data = await post("/api/skill-check/grade", { ticket, chosenLevel: cur.chosenLevel, stages: submissionOf(cur, stage), tabSwitches });
+      if (!data.done) return false;
+      setGraded(data);
       setScreen("lead");
+      return true;
     } catch (err) {
-      setRejected(err instanceof Error ? err.message : "Something went wrong. Please retake the quiz.");
+      if (!(err instanceof HttpError)) throw err;
+      setRejected(err.message);
       setScreen("rejected");
+      return true;
     }
   }
 
@@ -81,8 +89,7 @@ export default function Assessment() {
         <div className="mx-auto w-full max-w-5xl px-4 pt-10 pb-16 sm:px-6">
           {screen === "pick" && <Pick onBack={() => setScreen("home")} onPick={brief} />}
           {screen === "brief" && s && <Briefing s={s} onBack={() => setScreen("home")} onStart={start} />}
-          {screen === "quiz" && s && <Arena initial={s} onFinish={finish} />}
-          {screen === "grading" && <p role="status" className="sc-rise mt-10 text-center text-lg text-muted">Scoring your answers…</p>}
+          {screen === "quiz" && s && <Arena initial={s} gradeStage={gradeStage} />}
           {screen === "rejected" && s && (
             <section className="sc-rise mx-auto mt-6 max-w-xl">
               <div className={eyebrow}>Not scored</div>
@@ -105,8 +112,8 @@ function Briefing({ s, onBack, onStart }: { s: Session; onBack: () => void; onSt
   const n = questionCount(s.chosenLevel);
   const rules = [
     ["It starts with the basics, then gets serious", "Stage 1 is AI basics, Stages 2 and 3 are engineering-level GenAI and ML, and Stage 4 is graduate-level agents and systems."],
-    [`${SECONDS_PER_QUESTION} seconds per question, no going back`, `${n} questions, one at a time. Pick an answer and the next question appears. If the clock runs out, that question counts as unanswered and you move on.`],
-    ["Clear a stage to go up", "You answer every stage in one run. We score it stage by stage: pass one and the next counts, fail one and your level is set there."],
+    [`${SECONDS_PER_QUESTION} seconds per question, no going back`, `Up to ${n} questions, one at a time. Pick an answer and the next question appears. If the clock runs out you get a new question instead, up to ${MAX_SWAPS_PER_STAGE} times per stage; after that it counts as unanswered.`],
+    ["Clear a stage to unlock the next", "Each stage is checked as soon as you finish it. Pass and the next, harder stage unlocks. Fail and the test ends there, and that sets your level."],
   ];
   async function go() {
     setBusy(true); setError("");
